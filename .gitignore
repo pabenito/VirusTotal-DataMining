@@ -1,3 +1,6 @@
+# Exclude compiled book
+VirusTotal/_book
+
 # History files
 .Rhistory
 .Rapp.history

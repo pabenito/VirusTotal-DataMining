@@ -1,7 +1,0 @@
-about
-usage
-render-book
-preview-book
-virus-total-data-mining
-objetivo
-goal
