@@ -26,13 +26,13 @@ Steps:
 
 Set the path to import the JSONs files.
 
-```{r}
+```{r warning=FALSE}
 path_import_jsons <- "/home/pedro/projects/virusTotal-DataMining/data/json"
 ```
 
 Set the path to export the dataset as CSV.
 
-```{r}
+```{r warning=FALSE}
 path_export_csv <- "/home/pedro/projects/virusTotal-DataMining/data/virusTotal.csv"
 ```
 
@@ -47,9 +47,7 @@ library(tidyjson)
 
 ### Load JSON
 
-List JSONs files paths.
-
-### Define functions
+#### Define functions
 
 Define function for list a forlder.
 
@@ -64,7 +62,7 @@ list_folder <-
 Define function for transform JSON to a tibble.
 
 ```{r}
-json_to_tibble <- 
+json_to_df <- 
   function(path){
     path %>% 
       read_json() %>% 
@@ -76,18 +74,26 @@ json_to_tibble <-
 Define function for that generate a dataset from a folder with JSONs files.
 
 ```{r}
-jsons_folder_to_tibble <- 
+jsons_folder_to_df <- 
   function(path){
     path %>% 
       list_folder() %>% 
-      lapply(json_to_tibble) %>% 
-      bind_rows()
+      lapply(json_to_df) %>% 
+      bind_rows() %>% 
+      lapply(as.character)
   }
 ```
 
+#### Load with functions
 
 ```{r}
-android <- jsons_folder_to_tibble(path_import_jsons)
+df <- jsons_folder_to_df(path_import_jsons)
+```
+
+### Save as CSV
+
+```{r}
+write.csv(df, path_export_csv)
 ```
 
 
