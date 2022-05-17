@@ -27,13 +27,13 @@ Steps:
 Set the path to import the JSONs files.
 
 ```{r warning=FALSE}
-path_import_jsons <- "/home/pedro/projects/virusTotal-DataMining/data/json"
+path_import_jsons <- "F:/Laboratorio de Computación/Android"
 ```
 
 Set the path to export the dataset as CSV.
 
 ```{r warning=FALSE}
-path_export_csv <- "/home/pedro/projects/virusTotal-DataMining/data/virusTotal.csv"
+path_export_csv <- "C:/Users/angel/Desktop/R_TRABAJO/VirusTotal-DataMining/VirusTotal/virusTotal.csv"
 ```
 
 ## Libraries
@@ -97,6 +97,9 @@ write.csv(df, path_export_csv)
 ```
 
 
-
+```{r}
+virus <- read.csv('virusTotal.csv')
+View(virus)
+```
 
 
