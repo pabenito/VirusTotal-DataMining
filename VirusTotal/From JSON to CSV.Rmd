@@ -1,0 +1,102 @@
+---
+title: "From JSON to CSV"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# From JSON to CSV
+
+We have a dataset in JSONs files, but the suitable type of file is CSV. So we need to convert the JSONs to a CSV file. 
+
+Steps:
+
+1. Load the JSONs files.
+2. Convert JSONs to dataset.
+3. Save dasaset as CSV file.
+
+## Configuration
+
+Set the path to import the JSONs files.
+
+```{r warning=FALSE}
+path_import_jsons <- "/home/pedro/projects/virusTotal-DataMining/data/json"
+```
+
+Set the path to export the dataset as CSV.
+
+```{r warning=FALSE}
+path_export_csv <- "/home/pedro/projects/virusTotal-DataMining/data/virusTotal.csv"
+```
+
+## Libraries
+
+```{r message=FALSE}
+library(dplyr)
+library(tidyjson)
+```
+
+## Convertion
+
+### Load JSON
+
+#### Define functions
+
+Define function for list a forlder.
+
+```{r}
+list_folder <- 
+  function(path){
+    list.files(path = path) %>% 
+    sapply(function(json) paste(path, json, sep="/"))
+  }
+```
+
+Define function for transform JSON to a tibble.
+
+```{r}
+json_to_df <- 
+  function(path){
+    path %>% 
+      read_json() %>% 
+      spread_all() %>% 
+      tibble()
+  }
+```
+
+Define function for that generate a dataset from a folder with JSONs files.
+
+```{r}
+jsons_folder_to_df <- 
+  function(path){
+    path %>% 
+      list_folder() %>% 
+      lapply(json_to_df) %>% 
+      bind_rows() %>% 
+      lapply(as.character)
+  }
+```
+
+#### Load with functions
+
+```{r}
+df <- jsons_folder_to_df(path_import_jsons)
+```
+
+### Save as CSV
+
+```{r}
+write.csv(df, path_export_csv)
+```
+
+
+
+
+
