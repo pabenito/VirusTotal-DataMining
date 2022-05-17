@@ -1,0 +1,148 @@
+---
+title: "Preprocessing Dataset"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Preprocessing Dataset
+
+## Libraries
+
+Library for read dataset.
+
+```{r}
+library(readr)
+```
+
+Library for data frames processing.
+
+```{r message=FALSE}
+library(dplyr)
+```
+
+Library for R Markdown.
+
+```{r}
+library(rmarkdown)
+library(knitr)
+```
+
+Library for data presentation.
+
+```{r message=FALSE}
+library(scales)
+```
+
+## Load dataset
+
+Load dataset.
+
+```{r message=FALSE}
+df <- read_csv("projects/VirusTotal-DataMining/data/virusTotal.csv")
+```
+
+## Inspecting dataset
+
+Dimensions.
+
+```{r}
+dim(df)
+```
+### Types
+
+Numeric columns.
+
+```{r}
+sapply(df, is.numeric) %>% 
+  sum()
+```
+### NA
+
+#### Percentaje of NA values
+
+```{r}
+num_of_NA <- 
+  df %>% 
+  is.na %>% 
+  sum
+
+num_of_values <- 
+  df %>% 
+  dim %>% 
+  prod
+
+NA_percentaje <- 
+  (num_of_NA / num_of_values) %>% 
+  percent
+```
+```{r echo=FALSE}
+NA_percentaje
+```
+
+#### Columns with NA
+
+Colums with NA.
+
+```{r}
+num_of_NA_by_column <- 
+  df %>% 
+  is.na %>% 
+  colSums()
+
+num_of_NA_by_column <- 
+  num_of_NA_by_column[num_of_NA_by_column!=0]
+
+names_of_colums_with_NA <- 
+  names(num_of_NA_by_column)
+
+num_of_cols_with_NA <- 
+  num_of_NA_by_column %>% 
+  length()
+
+percentaje_of_cols_with_NA <-
+  (num_of_cols_with_NA / ncol(df)) %>% 
+  percent
+```
+```{r echo=FALSE}
+sprintf("Number of colums with NA values: %d", num_of_cols_with_NA)
+sprintf("Percentaje of colums with NA values: %s", as.character(percentaje_of_cols_with_NA))
+```
+Numeric colums with NA.
+
+```{r}
+num_of_numeric_cols_with_NA <- 
+  df %>% 
+  select_if(is.numeric) %>% 
+  select_if(anyNA) %>% 
+  ncol()
+
+percentaje_of_numeric_cols_with_NA <- 
+  (num_of_numeric_cols_with_NA / ncol(df)) %>% 
+  percent()
+
+names_of_numeric_colums_with_NA <- 
+  df %>% 
+  select_if(is.numeric) %>% 
+  select_if(anyNA) %>% 
+  colnames()
+```
+```{r echo=FALSE}
+sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_NA)
+sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
+```
+
+
+
+
+
+
+
+
