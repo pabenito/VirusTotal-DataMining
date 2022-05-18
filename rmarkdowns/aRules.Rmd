@@ -41,7 +41,7 @@ lista <- list(additional_info.androguard.RiskIndicator.PERM.DANGEROUS = 0,
               additional_info.androguard.RiskIndicator.PERM.EPHEMERAL = 0,
               additional_info.androguard.RiskIndicator.PERM.PREINSTALLED = 0,
               additional_info.androguard.RiskIndicator.PERM.INSTALLER = 0,
-              additional_info.androguard.RiskIndicator.PERM.RUNTIME = 1)
+              additional_info.androguard.RiskIndicator.PERM.RUNTIME = 0)
 
 virus <- replace_na(virus, lista)
 
