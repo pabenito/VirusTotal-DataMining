@@ -50,3 +50,6 @@ vignettes/*.pdf
 _book
 _bookdown_files
 *.DS_Store
+
+# Eclude HTMLs generated from RMDs in book prject root
+VirusTotal/*.html
