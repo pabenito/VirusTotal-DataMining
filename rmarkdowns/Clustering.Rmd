@@ -1,0 +1,40 @@
+---
+title: "Clustering"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Clustering
+
+## Libraries
+
+```{r message=FALSE, warning=FALSE}
+library(rmarkdown)
+library(kableExtra)
+library(dplyr)
+library(factoextra)
+library(cluster)
+library(ggplot2)
+library(gridExtra)
+library(data.table)
+library(gcookbook)
+library(readr)
+```
+
+## Load dataset
+
+```{r}
+virusTotal <- read_csv("../VirusTotal/data/virusTotal.csv")
+```
+
+
+
+
