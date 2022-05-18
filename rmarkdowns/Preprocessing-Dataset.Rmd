@@ -46,7 +46,7 @@ library(scales)
 Load dataset.
 
 ```{r message=FALSE}
-df <- read_csv("../VirusTotal/data/virusTotal.csv")
+df <- read_csv("../virusTotal/data/virusTotal.csv")
 ```
 
 ## Inspecting dataset
@@ -58,57 +58,29 @@ dim(df)
 ```
 ### Types
 
-Numeric columns.
+View witch types are in the dataset.
 
 ```{r}
-df %>% 
-  sapply(is.numeric) %>% 
-  sum()
-```
-
-Character colums.
-
-```{r}
-df %>% 
-  sapply(is.character) %>% 
-  sum()
-```
-
-Logical colums.
-
-```{r}
-df %>% 
-  sapply(is.logical) %>% 
-  sum()
-```
-
-Inspect if there are colums which types are neither numerical nor logical nor character.
-
-```{r}
-strange_types_colums_logical <- 
+col_types_all <- 
   df %>% 
-  sapply(function(col) !is.numeric(col) & !is.character(col) & !is.logical(col))
+  sapply(class) %>% 
+  unlist()
 
-num_of_strange_types_colums <- 
-  strange_types_colums_logical %>% 
-  sum()
+col_types_table <- 
+  col_types_all %>% 
+  table()
 
-strange_types_colums_names <- 
-  df[which(strange_types_colums_logical)] %>% 
-  names()
+col_types <- 
+  col_types_table %>% 
+  as.vector()
 
-colum_types <- 
-  df %>% 
-  sapply(class)
-
-strange_types_colums_types <- 
-  colum_types[which(strange_types_colums_logical)]
+names(col_types) <- names(col_types_table)
 ```
-```{r echo=FALSE}
-strange_types_colums_types
+```{r}
+col_types
 ```
 
-
+As can be seen there are only four col types: numeric, character, logical, and date (POSIX)
 
 ### NA
 
