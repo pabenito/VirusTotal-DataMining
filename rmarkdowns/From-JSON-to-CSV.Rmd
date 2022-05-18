@@ -27,13 +27,13 @@ Steps:
 Set the path to import the JSONs files.
 
 ```{r}
-path_import_jsons <- "data/json"
+path_import_jsons <- "../virusTotal/data/json"
 ```
 
 Set the path to export the dataset as CSV.
 
 ```{r}
-path_export_csv <- "data/virusTotal.csv"
+path_export_csv <- "../virusTotal/data/virusTotal.csv"
 ```
 
 ## Libraries
@@ -46,7 +46,7 @@ library(dplyr)
 
 Library for manipulate JSONs.
 
-```{r}
+```{r message=FALSE}
 library(tidyjson)
 ```
 
@@ -163,7 +163,7 @@ from_json_to_csv_parallel <-
 
 Using defined functions for converting from JSON to CSV.
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 from_json_to_csv_parallel(path_import_jsons, path_export_csv)
 ```
 

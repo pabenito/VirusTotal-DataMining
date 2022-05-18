@@ -92,11 +92,12 @@ As can be seen there are only four col types: numeric, character, logical, and d
 Cols with type POSIX.
 
 ```{r}
-date_cols <- 
-  df %>% 
-  select(str_which(col_types_all, "POSIX")) %>% 
+df %>% 
+  select(-str_which(col_types_all, "POSIX")) %>% 
   head()
 ```
+
+The colums 
 
 ### NA
 
@@ -182,6 +183,33 @@ df <-
   select(., str_which(colnames(.), "additional_info.androguard.RiskIndicator.PERM")) %>% 
   lapply(function(col) replace_na(col, 0))
 ```
+
+```{r}
+cut_by_quantiles <- 
+  function(col){
+    labels <- c("very low", "low", "medium", "high", "very high")
+    col %>% 
+      sapply(., cut(breaks = quantile(.), labels = labels))
+  }
+
+df_cut_by_quantiles <- 
+  function(df){
+    df_without_numeric <- df[!is.numeric(df)]
+    df_numeric <- 
+      select_if(is.numeric)
+    df_numeric <- 
+      df_numeric %>% 
+      lapply(cut_by_quantiles)
+    cbind(df_without_numeric, df_numeric)
+  }
+
+df_test <- 
+  df %>% 
+  select_if(is.numeric) %>% 
+  df_cut_by_quantiles()
+  
+```
+
 
 
 
