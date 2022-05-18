@@ -26,6 +26,7 @@ Library for data frames processing.
 
 ```{r message=FALSE}
 library(dplyr)
+library(tidyr)
 ```
 
 Library for R Markdown.
@@ -39,6 +40,12 @@ Library for data presentation.
 
 ```{r message=FALSE}
 library(scales)
+```
+
+Library for manage strings.
+
+```{r}
+library(stringr)
 ```
 
 ## Load dataset
@@ -80,7 +87,16 @@ names(col_types) <- names(col_types_table)
 col_types
 ```
 
-As can be seen there are only four col types: numeric, character, logical, and date (POSIX)
+As can be seen there are only four col types: numeric, character, logical, and date (POSIX).
+
+Cols with type POSIX.
+
+```{r}
+date_cols <- 
+  df %>% 
+  select(str_which(col_types_all, "POSIX")) %>% 
+  head()
+```
 
 ### NA
 
@@ -157,6 +173,17 @@ names_of_numeric_colums_with_NA <-
 sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_NA)
 sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
 ```
+
+## Change NA for 0 into additional_info.audroidguard.RiskIndicator.PERM
+
+```{r}
+df <- 
+  df %>% 
+  select(., str_which(colnames(.), "additional_info.androguard.RiskIndicator.PERM")) %>% 
+  lapply(function(col) replace_na(col, 0))
+```
+
+
 
 
 
