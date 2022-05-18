@@ -175,39 +175,69 @@ sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_
 sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
 ```
 
-## Change NA for 0 into additional_info.audroidguard.RiskIndicator.PERM
+## Replace NA for 0 into permissions colums
 
 ```{r}
-df <- 
+df_permissions <- 
   df %>% 
   select(., str_which(colnames(.), "additional_info.androguard.RiskIndicator.PERM")) %>% 
-  lapply(function(col) replace_na(col, 0))
+  sapply(function(col) replace_na(col, 0))
+
+df_without_permissions <- 
+  df %>% 
+  select(., -c(str_which(colnames(.), "additional_info.androguard.RiskIndicator.PERM")))
+
+df <- cbind(df_permissions, df_without_permissions)
 ```
 
+## As factor
+
 ```{r}
+labels <- 
+  function(n){
+    if(n == 5){
+      return(c("very low", "low", "medium", "high", "very high"))
+    }else if(n == 4){
+      return(c("very low", "low", "high", "very high"))
+    }else if(n == 3){
+      return(c("low", "medium", "high"))
+    }else if(n == 2){
+      return(c("low", "high"))
+    }else{
+      stop("Not avalible")
+    }
+  }
+
 cut_by_quantiles <- 
   function(col){
     labels <- c("very low", "low", "medium", "high", "very high")
-    col %>% 
-      sapply(., cut(breaks = quantile(.), labels = labels))
+    quantiles <- 
+      col %>% 
+      na.omit() %>% 
+      quantile() %>% 
+      unique()
+    if(length(quantiles) > 2){
+      col <- 
+        col %>% 
+        cut(breaks = quantiles, labels = labels(length(quantiles)-1))
+    }
+    return(col)
   }
 
 df_cut_by_quantiles <- 
   function(df){
     df_without_numeric <- df[!is.numeric(df)]
     df_numeric <- 
+      df %>% 
       select_if(is.numeric)
     df_numeric <- 
       df_numeric %>% 
       lapply(cut_by_quantiles)
-    cbind(df_without_numeric, df_numeric)
+    return(cbind(df_without_numeric, df_numeric))
   }
 
 df_test <- 
-  df %>% 
-  select_if(is.numeric) %>% 
-  df_cut_by_quantiles()
-  
+  df_cut_by_quantiles(df)
 ```
 
 
