@@ -19,9 +19,23 @@ library(rmarkdown)
 
 ```{r lectura, include=FALSE}
 virus <- read.csv('virusTotal.csv')
+virus$additional_info.androguard.RiskIndicator.PERM.PRIVACY
+
 ```
 
+```{r lectura, include=FALSE}
+rules <- virus %>%
+   select(-c(additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
+             additional_info.androguard.RiskIndicator.PERM.GPS,
+             additional_info.androguard.RiskIndicator.PERM.NORMAL,
+             additional_info.androguard.RiskIndicator.PERM.PRIVACY
+             
+             
+             ))
 
+
+
+```
 
 ## R Markdown
 
