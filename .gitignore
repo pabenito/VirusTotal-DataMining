@@ -53,3 +53,4 @@ _bookdown_files
 
 # Eclude HTMLs generated from RMDs in book prject root
 VirusTotal/*.html
+rmardowns/*.html

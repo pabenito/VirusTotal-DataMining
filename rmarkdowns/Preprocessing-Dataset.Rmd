@@ -46,7 +46,7 @@ library(scales)
 Load dataset.
 
 ```{r message=FALSE}
-df <- read_csv("/home/pedro/projects/VirusTotal-DataMining/data/virusTotal.csv")
+df <- read_csv("../VirusTotal/data/virusTotal.csv")
 ```
 
 ## Inspecting dataset
