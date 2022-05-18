@@ -163,7 +163,7 @@ from_json_to_csv_parallel <-
 
 Using defined functions for converting from JSON to CSV.
 
-```{r}
+```{r eval=FALSE}
 from_json_to_csv_parallel(path_import_jsons, path_export_csv)
 ```
 
