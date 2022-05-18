@@ -40,3 +40,17 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Bookdown ignore
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.rsconnect
+_book
+_bookdown_files
+*.DS_Store
+
+# Eclude HTMLs generated from RMDs in book prject root
+VirusTotal/*.html
+rmardowns/*.html
