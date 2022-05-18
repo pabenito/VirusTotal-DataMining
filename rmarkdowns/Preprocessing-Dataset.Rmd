@@ -210,7 +210,6 @@ labels <-
 
 cut_by_quantiles <- 
   function(col){
-    labels <- c("very low", "low", "medium", "high", "very high")
     quantiles <- 
       col %>% 
       na.omit() %>% 
