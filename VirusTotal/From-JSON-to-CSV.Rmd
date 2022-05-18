@@ -26,28 +26,39 @@ Steps:
 
 Set the path to import the JSONs files.
 
-```{r warning=FALSE}
-path_import_jsons <- "F:/Laboratorio de Computación/Android"
+```{r}
+path_import_jsons <- "data/json"
 ```
 
 Set the path to export the dataset as CSV.
 
-```{r warning=FALSE}
-path_export_csv <- "C:/Users/angel/Desktop/R_TRABAJO/VirusTotal-DataMining/VirusTotal/virusTotal.csv"
+```{r}
+path_export_csv <- "data/virusTotal.csv"
 ```
 
 ## Libraries
 
+Library for pipe working.
+
 ```{r message=FALSE}
 library(dplyr)
+```
+
+Library for manipulate JSONs.
+
+```{r}
 library(tidyjson)
 ```
 
-## Convertion
+Libraries for parallel execution.
 
-### Load JSON
+```{r warning=FALSE}
+library(parallel)
+```
 
-#### Define functions
+## Defining functions
+
+### Auxiliary functions
 
 Define function for list a forlder.
 
@@ -59,7 +70,7 @@ list_folder <-
   }
 ```
 
-Define function for transform JSON to a tibble.
+Define function for transform JSON to a dataset
 
 ```{r}
 json_to_df <- 
@@ -71,7 +82,7 @@ json_to_df <-
   }
 ```
 
-Define function for that generate a dataset from a folder with JSONs files.
+Define function for generate a dataset from a folder with JSONs files.
 
 ```{r}
 jsons_folder_to_df <- 
@@ -79,27 +90,81 @@ jsons_folder_to_df <-
     path %>% 
       list_folder() %>% 
       lapply(json_to_df) %>% 
-      bind_rows() %>% 
-      lapply(as.character)
+      bind_rows()
   }
 ```
 
-#### Load with functions
+Define function for save a data frame to CSV.
 
 ```{r}
-df <- jsons_folder_to_df(path_import_jsons)
+save_df_to_csv <- 
+  function(df, path){
+    df %>% 
+      lapply(as.character) %>% 
+      write.csv(path_export_csv)
+  }
 ```
 
-### Save as CSV
+Define function for generate a CSV datset from a JSON folder.
 
 ```{r}
-write.csv(df, path_export_csv)
+from_json_to_csv <- 
+  function(json_folder_path, csv_path){
+    jsons_folder_to_df(json_folder_path) %>% 
+      save_df_to_csv(csv_path)
+  }
 ```
 
+### Parallel
+
+Define function for setup the cluster, with needed libraries
 
 ```{r}
-virus <- read.csv('virusTotal.csv')
-View(virus)
+setup_cluster <- 
+  function() {
+    cluster <- 
+      detectCores() %>% 
+      makeCluster()
+    clusterEvalQ(cluster, expr = library(tidyjson))
+    clusterEvalQ(cluster, expr = library(dplyr))
+    return(cluster)
+  }
+```
+
+Define function for generate a dataset from a folder with JSONs files by parallel execution.
+
+```{r}
+jsons_folder_to_df_parallel <- 
+  function(cluster, path){
+    json_paths <- list_folder(path)
+    df <- 
+      cluster %>% 
+      parLapply(json_paths, json_to_df) %>% 
+      bind_rows() 
+    json_paths
+    return(df)
+  }
+```
+
+Define function for generate a CSV datset from a JSON folder by parallel execution.
+
+```{r}
+from_json_to_csv_parallel <- 
+  function(json_folder_path, csv_path){
+    cluster <- setup_cluster() 
+    cluster %>% 
+      jsons_folder_to_df_parallel(json_folder_path) %>% 
+      save_df_to_csv(csv_path)
+    stopCluster(cluster)
+  }
+```
+
+## From JSON to CSV
+
+Using defined functions for converting from JSON to CSV.
+
+```{r}
+from_json_to_csv_parallel(path_import_jsons, path_export_csv)
 ```
 
 
