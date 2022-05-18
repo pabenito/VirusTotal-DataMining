@@ -46,7 +46,7 @@ library(scales)
 Load dataset.
 
 ```{r message=FALSE}
-df <- read_csv("projects/VirusTotal-DataMining/data/virusTotal.csv")
+df <- read_csv("/home/pedro/projects/VirusTotal-DataMining/data/virusTotal.csv")
 ```
 
 ## Inspecting dataset
@@ -61,9 +61,55 @@ dim(df)
 Numeric columns.
 
 ```{r}
-sapply(df, is.numeric) %>% 
+df %>% 
+  sapply(is.numeric) %>% 
   sum()
 ```
+
+Character colums.
+
+```{r}
+df %>% 
+  sapply(is.character) %>% 
+  sum()
+```
+
+Logical colums.
+
+```{r}
+df %>% 
+  sapply(is.logical) %>% 
+  sum()
+```
+
+Inspect if there are colums which types are neither numerical nor logical nor character.
+
+```{r}
+strange_types_colums_logical <- 
+  df %>% 
+  sapply(function(col) !is.numeric(col) & !is.character(col) & !is.logical(col))
+
+num_of_strange_types_colums <- 
+  strange_types_colums_logical %>% 
+  sum()
+
+strange_types_colums_names <- 
+  df[which(strange_types_colums_logical)] %>% 
+  names()
+
+colum_types <- 
+  df %>% 
+  sapply(class)
+
+strange_types_colums_types <- 
+  colum_types[which(strange_types_colums_logical)]
+```
+```{r echo=FALSE}
+strange_types_colums_types
+```
+
+
+
 ### NA
 
 #### Percentaje of NA values
@@ -115,6 +161,7 @@ percentaje_of_cols_with_NA <-
 sprintf("Number of colums with NA values: %d", num_of_cols_with_NA)
 sprintf("Percentaje of colums with NA values: %s", as.character(percentaje_of_cols_with_NA))
 ```
+
 Numeric colums with NA.
 
 ```{r}

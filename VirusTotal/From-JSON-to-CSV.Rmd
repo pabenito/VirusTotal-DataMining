@@ -1,0 +1,170 @@
+---
+title: "From JSON to CSV"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# From JSON to CSV
+
+We have a dataset in JSONs files, but the suitable type of file is CSV. So we need to convert the JSONs to a CSV file. 
+
+Steps:
+
+1. Load the JSONs files.
+2. Convert JSONs to dataset.
+3. Save dasaset as CSV file.
+
+## Configuration
+
+Set the path to import the JSONs files.
+
+```{r}
+path_import_jsons <- "data/json"
+```
+
+Set the path to export the dataset as CSV.
+
+```{r}
+path_export_csv <- "data/virusTotal.csv"
+```
+
+## Libraries
+
+Library for pipe working.
+
+```{r message=FALSE}
+library(dplyr)
+```
+
+Library for manipulate JSONs.
+
+```{r}
+library(tidyjson)
+```
+
+Libraries for parallel execution.
+
+```{r warning=FALSE}
+library(parallel)
+```
+
+## Defining functions
+
+### Auxiliary functions
+
+Define function for list a forlder.
+
+```{r}
+list_folder <- 
+  function(path){
+    list.files(path = path) %>% 
+    sapply(function(json) paste(path, json, sep="/"))
+  }
+```
+
+Define function for transform JSON to a dataset
+
+```{r}
+json_to_df <- 
+  function(path){
+    path %>% 
+      read_json() %>% 
+      spread_all() %>% 
+      tibble()
+  }
+```
+
+Define function for generate a dataset from a folder with JSONs files.
+
+```{r}
+jsons_folder_to_df <- 
+  function(path){
+    path %>% 
+      list_folder() %>% 
+      lapply(json_to_df) %>% 
+      bind_rows()
+  }
+```
+
+Define function for save a data frame to CSV.
+
+```{r}
+save_df_to_csv <- 
+  function(df, path){
+    df %>% 
+      lapply(as.character) %>% 
+      write.csv(path_export_csv)
+  }
+```
+
+Define function for generate a CSV datset from a JSON folder.
+
+```{r}
+from_json_to_csv <- 
+  function(json_folder_path, csv_path){
+    jsons_folder_to_df(json_folder_path) %>% 
+      save_df_to_csv(csv_path)
+  }
+```
+
+### Parallel
+
+Define function for setup the cluster, with needed libraries
+
+```{r}
+setup_cluster <- 
+  function() {
+    cluster <- 
+      detectCores() %>% 
+      makeCluster()
+    clusterEvalQ(cluster, expr = library(tidyjson))
+    clusterEvalQ(cluster, expr = library(dplyr))
+    return(cluster)
+  }
+```
+
+Define function for generate a dataset from a folder with JSONs files by parallel execution.
+
+```{r}
+jsons_folder_to_df_parallel <- 
+  function(cluster, path){
+    json_paths <- list_folder(path)
+    df <- 
+      cluster %>% 
+      parLapply(json_paths, json_to_df) %>% 
+      bind_rows() 
+    json_paths
+    return(df)
+  }
+```
+
+Define function for generate a CSV datset from a JSON folder by parallel execution.
+
+```{r}
+from_json_to_csv_parallel <- 
+  function(json_folder_path, csv_path){
+    cluster <- setup_cluster() 
+    cluster %>% 
+      jsons_folder_to_df_parallel(json_folder_path) %>% 
+      save_df_to_csv(csv_path)
+    stopCluster(cluster)
+  }
+```
+
+## From JSON to CSV
+
+Using defined functions for converting from JSON to CSV.
+
+```{r eval=FALSE}
+from_json_to_csv_parallel(path_import_jsons, path_export_csv)
+```
+
+
