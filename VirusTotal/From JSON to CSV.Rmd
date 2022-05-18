@@ -87,6 +87,7 @@ jsons_folder_to_df <-
 #### Load with functions
 
 ```{r}
+View(df)
 df <- jsons_folder_to_df(path_import_jsons)
 ```
 
@@ -100,6 +101,7 @@ write.csv(df, path_export_csv)
 ```{r}
 virus <- read.csv('virusTotal.csv')
 View(virus)
+virus$perm
 ```
 
 
