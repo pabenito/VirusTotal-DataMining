@@ -195,6 +195,13 @@ df <-
   select(-all_of(cols_full_of_NA))
 ```
 
+#### Colums with the same value
+
+```{r}
+
+```
+
+
 ## Inspecting dataframe
 
 Now let's deeply inspect into the dataframe.
@@ -304,7 +311,8 @@ cut_by_quantiles <-
 
 df_cut_by_quantiles <- 
   function(df){
-    df_without_numeric <- df[!is.numeric(df)]
+    df_without_numeric <- 
+      df[sapply(df, function(col) !is.numeric(col))]
     df_numeric <- 
       df %>% 
       select_if(is.numeric)
@@ -313,9 +321,6 @@ df_cut_by_quantiles <-
       lapply(cut_by_quantiles)
     return(cbind(df_without_numeric, df_numeric))
   }
-
-df_test <- 
-  df_cut_by_quantiles(df)
 ```
 
 
