@@ -56,7 +56,7 @@ Load dataset.
 df <- read_csv("../virusTotal/data/virusTotal.csv")
 ```
 
-## Inspecting dataset
+## Statistics
 
 Dimensions.
 
@@ -70,7 +70,7 @@ View witch types are in the dataset.
 ```{r}
 col_types_all <- 
   df %>% 
-  sapply(class) %>% 
+  sapply(typeof) %>% 
   unlist()
 
 col_types_table <- 
@@ -83,21 +83,11 @@ col_types <-
 
 names(col_types) <- names(col_types_table)
 ```
-```{r}
+```{r echo=FALSE}
 col_types
 ```
 
-As can be seen there are only four col types: numeric, character, logical, and date (POSIX).
-
-Cols with type POSIX.
-
-```{r}
-df %>% 
-  select(-str_which(col_types_all, "POSIX")) %>% 
-  head()
-```
-
-The colums 
+As can be seen there are the three expected types: character, double and logical.
 
 ### NA
 
@@ -174,7 +164,6 @@ names_of_numeric_colums_with_NA <-
 sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_NA)
 sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
 ```
-
 Inspect if there are columns full of NA.
 
 ```{r}
@@ -196,9 +185,7 @@ cols_full_of_NA <-
 ```{r echo=FALSE}
 cols_full_of_NA
 ```
-## Remove colums
 
-### Cols full of NA
 
 As can be seen there are many columns that are full of NA, so can be deleted.
 
@@ -208,7 +195,66 @@ df <-
   select(-all_of(cols_full_of_NA))
 ```
 
-## Replace NA for 0 into permissions colums
+## Inspecting dataframe
+
+Now let's deeply inspect into the dataframe.
+
+```{r echo=FALSE}
+df %>% paged_table()
+```
+
+### Replace NA for 0 into permissions colums
+
+The permissions columns (PERM) seems that there are NAs where there should be 0s. 
+So it would be better to replace them.
+
+```{r}
+replace_na_which_colname_match <- 
+  function(df, pattern, replacement){
+    cols_to_replace <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+```{r}
+replace_na_when <- 
+  function(df, exp, replacement){
+    cols_to_replace <- 
+      df %>% 
+      select_if(function(col) eval.parent(exp, col)) %>% 
+      colnames()
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+```{r}
+pattern <- "additional_info.androguard.RiskIndicator.PERM"
+
+df <- 
+  df %>% 
+  replace_na_which_colname_match(pattern, 0)
+
+df %>% 
+  select(., str_which(colnames(.), pattern)) %>% 
+  paged_table()
+```
 
 ```{r}
 df_permissions <- 

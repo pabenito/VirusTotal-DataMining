@@ -29,6 +29,1277 @@ document.addEventListener('DOMContentLoaded', function(e) {
   }
 });
 </script>
+<style type="text/css">.pagedtable {
+overflow: auto;
+padding-left: 8px;
+padding-right: 8px;
+}
+.pagedtable-wrapper {
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-bottom: 10px;
+}
+.pagedtable table {
+width: 100%;
+max-width: 100%;
+margin: 0;
+}
+.pagedtable th {
+padding: 0 5px 0 5px;
+border: none;
+border-bottom: 2px solid #dddddd;
+min-width: 45px;
+}
+.pagedtable-empty th {
+display: none;
+}
+.pagedtable td {
+padding: 0 4px 0 4px;
+}
+.pagedtable .even {
+background-color: rgba(140, 140, 140, 0.1);
+}
+.pagedtable-padding-col {
+display: none;
+}
+.pagedtable a {
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.pagedtable-index-nav {
+cursor: pointer;
+padding: 0 5px 0 5px;
+float: right;
+border: 0;
+}
+.pagedtable-index-nav-disabled {
+cursor: default;
+text-decoration: none;
+color: #999;
+}
+a.pagedtable-index-nav-disabled:hover {
+text-decoration: none;
+color: #999;
+}
+.pagedtable-indexes {
+cursor: pointer;
+float: right;
+border: 0;
+}
+.pagedtable-index-current {
+cursor: default;
+text-decoration: none;
+font-weight: bold;
+color: #333;
+border: 0;
+}
+a.pagedtable-index-current:hover {
+text-decoration: none;
+font-weight: bold;
+color: #333;
+}
+.pagedtable-index {
+width: 30px;
+display: inline-block;
+text-align: center;
+border: 0;
+}
+.pagedtable-index-separator-left {
+display: inline-block;
+color: #333;
+font-size: 9px;
+padding: 0 0 0 0;
+cursor: default;
+}
+.pagedtable-index-separator-right {
+display: inline-block;
+color: #333;
+font-size: 9px;
+padding: 0 4px 0 0;
+cursor: default;
+}
+.pagedtable-footer {
+padding-top: 4px;
+padding-bottom: 5px;
+}
+.pagedtable-not-empty .pagedtable-footer {
+border-top: 2px solid #dddddd;
+}
+.pagedtable-info {
+overflow: hidden;
+color: #999;
+white-space: nowrap;
+text-overflow: ellipsis;
+}
+.pagedtable-header-name {
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.pagedtable-header-type {
+color: #999;
+font-weight: 400;
+}
+.pagedtable-na-cell {
+font-style: italic;
+opacity: 0.3;
+}
+</style>
+<script>// Production steps of ECMA-262, Edition 5, 15.4.4.18
+// Reference: http://es5.github.io/#x15.4.4.18
+if (!Array.prototype.forEach) {
+
+  Array.prototype.forEach = function(callback, thisArg) {
+
+    var T, k;
+
+    if (this === null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling toObject() passing the
+    // |this| value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get() internal
+    // method of O with the argument "length".
+    // 3. Let len be toUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== "function") {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let
+    // T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let k be 0
+    k = 0;
+
+    // 7. Repeat, while k < len
+    while (k < len) {
+
+      var kValue;
+
+      // a. Let Pk be ToString(k).
+      //    This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty
+      //    internal method of O with argument Pk.
+      //    This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        // method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Call the Call internal method of callback with T as
+        // the this value and argument list containing kValue, k, and O.
+        callback.call(T, kValue, k, O);
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+    // 8. return undefined
+  };
+}
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.19
+// Reference: http://es5.github.io/#x15.4.4.19
+if (!Array.prototype.map) {
+
+  Array.prototype.map = function(callback, thisArg) {
+
+    var T, A, k;
+
+    if (this == null) {
+      throw new TypeError(' this is null or not defined');
+    }
+
+    // 1. Let O be the result of calling ToObject passing the |this|
+    //    value as the argument.
+    var O = Object(this);
+
+    // 2. Let lenValue be the result of calling the Get internal
+    //    method of O with the argument "length".
+    // 3. Let len be ToUint32(lenValue).
+    var len = O.length >>> 0;
+
+    // 4. If IsCallable(callback) is false, throw a TypeError exception.
+    // See: http://es5.github.com/#x9.11
+    if (typeof callback !== 'function') {
+      throw new TypeError(callback + ' is not a function');
+    }
+
+    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
+    if (arguments.length > 1) {
+      T = thisArg;
+    }
+
+    // 6. Let A be a new array created as if by the expression new Array(len)
+    //    where Array is the standard built-in constructor with that name and
+    //    len is the value of len.
+    A = new Array(len);
+
+    // 7. Let k be 0
+    k = 0;
+
+    // 8. Repeat, while k < len
+    while (k < len) {
+
+      var kValue, mappedValue;
+
+      // a. Let Pk be ToString(k).
+      //   This is implicit for LHS operands of the in operator
+      // b. Let kPresent be the result of calling the HasProperty internal
+      //    method of O with argument Pk.
+      //   This step can be combined with c
+      // c. If kPresent is true, then
+      if (k in O) {
+
+        // i. Let kValue be the result of calling the Get internal
+        //    method of O with argument Pk.
+        kValue = O[k];
+
+        // ii. Let mappedValue be the result of calling the Call internal
+        //     method of callback with T as the this value and argument
+        //     list containing kValue, k, and O.
+        mappedValue = callback.call(T, kValue, k, O);
+
+        // iii. Call the DefineOwnProperty internal method of A with arguments
+        // Pk, Property Descriptor
+        // { Value: mappedValue,
+        //   Writable: true,
+        //   Enumerable: true,
+        //   Configurable: true },
+        // and false.
+
+        // In browsers that support Object.defineProperty, use the following:
+        // Object.defineProperty(A, k, {
+        //   value: mappedValue,
+        //   writable: true,
+        //   enumerable: true,
+        //   configurable: true
+        // });
+
+        // For best browser support, use the following:
+        A[k] = mappedValue;
+      }
+      // d. Increase k by 1.
+      k++;
+    }
+
+    // 9. return A
+    return A;
+  };
+}
+
+var PagedTable = function (pagedTable) {
+  var me = this;
+
+  var source = function(pagedTable) {
+    var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
+      return e.hasAttribute("data-pagedtable-source");
+    });
+
+    if (sourceElems === null || sourceElems.length !== 1) {
+      throw("A single data-pagedtable-source was not found");
+    }
+
+    return JSON.parse(sourceElems[0].innerHTML);
+  }(pagedTable);
+
+  var options = function(source) {
+    var options = typeof(source.options) !== "undefined" &&
+      source.options !== null ? source.options : {};
+
+    var columns = typeof(options.columns) !== "undefined" ? options.columns : {};
+    var rows = typeof(options.rows) !== "undefined" ? options.rows : {};
+
+    var positiveIntOrNull = function(value) {
+      return parseInt(value) >= 0 ? parseInt(value) : null;
+    };
+
+    return {
+      pages: positiveIntOrNull(options.pages),
+      rows: {
+        min: positiveIntOrNull(rows.min),
+        max: positiveIntOrNull(rows.max),
+        total: positiveIntOrNull(rows.total)
+      },
+      columns: {
+        min: positiveIntOrNull(columns.min),
+        max: positiveIntOrNull(columns.max),
+        total: positiveIntOrNull(columns.total)
+      }
+    };
+  }(source);
+
+  var Measurer = function() {
+
+    // set some default initial values that will get adjusted in runtime
+    me.measures = {
+      padding: 12,
+      character: 8,
+      height: 15,
+      defaults: true
+    };
+
+    me.calculate = function(measuresCell) {
+      if (!me.measures.defaults)
+        return;
+
+      var measuresCellStyle = window.getComputedStyle(measuresCell, null);
+
+      var newPadding = parsePadding(measuresCellStyle.paddingLeft) +
+            parsePadding(measuresCellStyle.paddingRight);
+
+      var sampleString = "ABCDEFGHIJ0123456789";
+      var newCharacter = Math.ceil(measuresCell.clientWidth / sampleString.length);
+
+      if (newPadding <= 0 || newCharacter <= 0)
+        return;
+
+      me.measures.padding = newPadding;
+      me.measures.character = newCharacter;
+      me.measures.height = measuresCell.clientHeight;
+      me.measures.defaults = false;
+    };
+
+    return me;
+  };
+
+  var Page = function(data, options) {
+    var me = this;
+
+    var defaults = {
+      max: 7,
+      rows: 10
+    };
+
+    var totalPages = function() {
+      return Math.ceil(data.length / me.rows);
+    };
+
+    me.number = 0;
+    me.max = options.pages !== null ? options.pages : defaults.max;
+    me.visible = me.max;
+    me.rows = options.rows.min !== null ? options.rows.min : defaults.rows;
+    me.total = totalPages();
+
+    me.setRows = function(newRows) {
+      me.rows = newRows;
+      me.total = totalPages();
+    };
+
+    me.setPageNumber = function(newPageNumber) {
+      if (newPageNumber < 0) newPageNumber = 0;
+      if (newPageNumber >= me.total) newPageNumber = me.total - 1;
+
+      me.number = newPageNumber;
+    };
+
+    me.setVisiblePages = function(visiblePages) {
+      me.visible = Math.min(me.max, visiblePages);
+      me.setPageNumber(me.number);
+    };
+
+    me.getVisiblePageRange = function() {
+      var start = me.number - Math.max(Math.floor((me.visible - 1) / 2), 0);
+      var end = me.number + Math.floor(me.visible / 2) + 1;
+      var pageCount = me.total;
+
+      if (start < 0) {
+        var diffToStart = 0 - start;
+        start += diffToStart;
+        end += diffToStart;
+      }
+
+      if (end > pageCount) {
+        var diffToEnd = end - pageCount;
+        start -= diffToEnd;
+        end -= diffToEnd;
+      }
+
+      start = start < 0 ? 0 : start;
+      end = end >= pageCount ? pageCount : end;
+
+      var first = false;
+      var last = false;
+
+      if (start > 0 && me.visible > 1) {
+        start = start + 1;
+        first = true;
+      }
+
+      if (end < pageCount && me.visible > 2) {
+        end = end - 1;
+        last = true;
+      }
+
+      return {
+        first: first,
+        start: start,
+        end: end,
+        last: last
+      };
+    };
+
+    me.getRowStart = function() {
+      var rowStart = page.number * page.rows;
+      if (rowStart < 0)
+        rowStart = 0;
+
+      return rowStart;
+    };
+
+    me.getRowEnd = function() {
+      var rowStart = me.getRowStart();
+      return Math.min(rowStart + me.rows, data.length);
+    };
+
+    me.getPaddingRows = function() {
+      var rowStart = me.getRowStart();
+      var rowEnd = me.getRowEnd();
+      return data.length > me.rows ? me.rows - (rowEnd - rowStart) : 0;
+    };
+  };
+
+  var Columns = function(data, columns, options) {
+    var me = this;
+
+    me.defaults = {
+      min: 5
+    };
+
+    me.number = 0;
+    me.visible = 0;
+    me.total = columns.length;
+    me.subset = [];
+    me.padding = 0;
+    me.min = options.columns.min !== null ? options.columns.min : me.defaults.min;
+    me.max = options.columns.max !== null ? options.columns.max : null;
+    me.widths = {};
+
+    var widthsLookAhead = Math.max(100, options.rows.min);
+    var paddingColChars = 10;
+
+    me.emptyNames = function() {
+      columns.forEach(function(column) {
+        if (columns.label !== null && columns.label !== "")
+          return false;
+      });
+
+      return true;
+    };
+
+    var parsePadding = function(value) {
+      return parseInt(value) >= 0 ? parseInt(value) : 0;
+    };
+
+    me.calculateWidths = function(measures) {
+      columns.forEach(function(column) {
+        var maxChars = Math.max(
+          column.label.toString().length,
+          column.type.toString().length
+        );
+
+        for (var idxRow = 0; idxRow < Math.min(widthsLookAhead, data.length); idxRow++) {
+          maxChars = Math.max(maxChars, data[idxRow][column.name.toString()].length);
+        }
+
+        me.widths[column.name] = {
+          // width in characters
+          chars: maxChars,
+          // width for the inner html columns
+          inner: maxChars * measures.character,
+          // width adding outer styles like padding
+          outer: maxChars * measures.character + measures.padding
+        };
+      });
+    };
+
+    me.getWidth = function() {
+      var widthOuter = 0;
+      for (var idxCol = 0; idxCol < me.subset.length; idxCol++) {
+        var columnName = me.subset[idxCol].name;
+        widthOuter = widthOuter + me.widths[columnName].outer;
+      }
+
+      widthOuter = widthOuter + me.padding * paddingColChars * measurer.measures.character;
+
+      if (me.hasMoreLeftColumns()) {
+        widthOuter = widthOuter + columnNavigationWidthPX + measurer.measures.padding;
+      }
+
+      if (me.hasMoreRightColumns()) {
+        widthOuter = widthOuter + columnNavigationWidthPX + measurer.measures.padding;
+      }
+
+      return widthOuter;
+    };
+
+    me.updateSlice = function() {
+      if (me.number + me.visible >= me.total)
+        me.number = me.total - me.visible;
+
+      if (me.number < 0) me.number = 0;
+
+      me.subset = columns.slice(me.number, Math.min(me.number + me.visible, me.total));
+
+      me.subset = me.subset.map(function(column) {
+        Object.keys(column).forEach(function(colKey) {
+          column[colKey] = column[colKey] === null ? "" : column[colKey].toString();
+        });
+
+        column.width = null;
+        return column;
+      });
+    };
+
+    me.setVisibleColumns = function(columnNumber, newVisibleColumns, paddingCount) {
+      me.number = columnNumber;
+      me.visible = newVisibleColumns;
+      me.padding = paddingCount;
+
+      me.updateSlice();
+    };
+
+    me.incColumnNumber = function(increment) {
+      me.number = me.number + increment;
+    };
+
+    me.setColumnNumber = function(newNumber) {
+      me.number = newNumber;
+    };
+
+    me.setPaddingCount = function(newPadding) {
+      me.padding = newPadding;
+    };
+
+    me.getPaddingCount = function() {
+      return me.padding;
+    };
+
+    me.hasMoreLeftColumns = function() {
+      return me.number > 0;
+    };
+
+    me.hasMoreRightColumns = function() {
+      return me.number + me.visible < me.total;
+    };
+
+    me.updateSlice(0);
+    return me;
+  };
+
+  var data = source.data;
+  var page = new Page(data, options);
+  var measurer = new Measurer(data, options);
+  var columns = new Columns(data, source.columns, options);
+
+  var table = null;
+  var tableDiv = null;
+  var header = null;
+  var footer = null;
+  var tbody = null;
+
+  // Caches pagedTable.clientWidth, specially for webkit
+  var cachedPagedTableClientWidth = null;
+
+  var onChangeCallbacks = [];
+
+  var clearSelection = function() {
+    if(document.selection && document.selection.empty) {
+      document.selection.empty();
+    } else if(window.getSelection) {
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+    }
+  };
+
+  var columnNavigationWidthPX = 5;
+
+  var renderColumnNavigation = function(increment, backwards) {
+    var arrow = document.createElement("div");
+    arrow.setAttribute("style",
+      "border-top: " + columnNavigationWidthPX + "px solid transparent;" +
+      "border-bottom: " + columnNavigationWidthPX + "px solid transparent;" +
+      "border-" + (backwards ? "right" : "left") + ": " + columnNavigationWidthPX + "px solid;");
+
+    var header = document.createElement("th");
+    header.appendChild(arrow);
+    header.setAttribute("style",
+      "cursor: pointer;" +
+      "vertical-align: middle;" +
+      "min-width: " + columnNavigationWidthPX + "px;" +
+      "width: " + columnNavigationWidthPX + "px;");
+
+    header.onclick = function() {
+      columns.incColumnNumber(backwards ? -1 : increment);
+
+      me.animateColumns(backwards);
+      renderFooter();
+
+      clearSelection();
+      triggerOnChange();
+    };
+
+    return header;
+  };
+
+  var maxColumnWidth = function(width) {
+    var padding = 80;
+    var columnMax = Math.max(cachedPagedTableClientWidth - padding, 0);
+
+    return parseInt(width) > 0 ?
+      Math.min(columnMax, parseInt(width)) + "px" :
+      columnMax + "px";
+  };
+
+  var clearHeader = function() {
+    var thead = pagedTable.querySelectorAll("thead")[0];
+    thead.innerHTML = "";
+  };
+
+  var renderHeader = function(clear) {
+    cachedPagedTableClientWidth = pagedTable.clientWidth;
+
+    var fragment = document.createDocumentFragment();
+
+    header = document.createElement("tr");
+    fragment.appendChild(header);
+
+    if (columns.number > 0)
+      header.appendChild(renderColumnNavigation(-columns.visible, true));
+
+    columns.subset = columns.subset.map(function(columnData) {
+      var column = document.createElement("th");
+      column.setAttribute("align", columnData.align);
+      column.style.textAlign = columnData.align;
+
+      column.style.maxWidth = maxColumnWidth(null);
+      if (columnData.width) {
+        column.style.minWidth =
+          column.style.maxWidth = maxColumnWidth(columnData.width);
+      }
+
+      var columnName = document.createElement("div");
+      columnName.setAttribute("class", "pagedtable-header-name");
+      if (columnData.label === "") {
+        columnName.innerHTML = "&nbsp;";
+      }
+      else {
+        columnName.appendChild(document.createTextNode(columnData.label));
+      }
+      column.appendChild(columnName);
+
+      var columnType = document.createElement("div");
+      columnType.setAttribute("class", "pagedtable-header-type");
+      if (columnData.type === "") {
+        columnType.innerHTML = "&nbsp;";
+      }
+      else {
+        columnType.appendChild(document.createTextNode("<" + columnData.type + ">"));
+      }
+      column.appendChild(columnType);
+
+      header.appendChild(column);
+
+      columnData.element = column;
+
+      return columnData;
+    });
+
+    for (var idx = 0; idx < columns.getPaddingCount(); idx++) {
+      var paddingCol = document.createElement("th");
+      paddingCol.setAttribute("class", "pagedtable-padding-col");
+      header.appendChild(paddingCol);
+    }
+
+    if (columns.number + columns.visible < columns.total)
+      header.appendChild(renderColumnNavigation(columns.visible, false));
+
+    if (typeof(clear) == "undefined" || clear) clearHeader();
+    var thead = pagedTable.querySelectorAll("thead")[0];
+    thead.appendChild(fragment);
+  };
+
+  me.animateColumns = function(backwards) {
+    var thead = pagedTable.querySelectorAll("thead")[0];
+
+    var headerOld = thead.querySelectorAll("tr")[0];
+    var tbodyOld = table.querySelectorAll("tbody")[0];
+
+    me.fitColumns(backwards);
+
+    renderHeader(false);
+
+    header.style.opacity = "0";
+    header.style.transform = backwards ? "translateX(-30px)" : "translateX(30px)";
+    header.style.transition = "transform 200ms linear, opacity 200ms";
+    header.style.transitionDelay = "0";
+
+    renderBody(false);
+
+    if (headerOld) {
+      headerOld.style.position = "absolute";
+      headerOld.style.transform = "translateX(0px)";
+      headerOld.style.opacity = "1";
+      headerOld.style.transition = "transform 100ms linear, opacity 100ms";
+      headerOld.setAttribute("class", "pagedtable-remove-head");
+      if (headerOld.style.transitionEnd) {
+        headerOld.addEventListener("transitionend", function() {
+          var headerOldByClass = thead.querySelector(".pagedtable-remove-head");
+          if (headerOldByClass) thead.removeChild(headerOldByClass);
+        });
+      }
+      else {
+        thead.removeChild(headerOld);
+      }
+    }
+
+    if (tbodyOld) table.removeChild(tbodyOld);
+
+    tbody.style.opacity = "0";
+    tbody.style.transition = "transform 200ms linear, opacity 200ms";
+    tbody.style.transitionDelay = "0ms";
+
+    // force relayout
+    window.getComputedStyle(header).opacity;
+    window.getComputedStyle(tbody).opacity;
+
+    if (headerOld) {
+      headerOld.style.transform = backwards ? "translateX(20px)" : "translateX(-30px)";
+      headerOld.style.opacity = "0";
+    }
+
+    header.style.transform = "translateX(0px)";
+    header.style.opacity = "1";
+
+    tbody.style.opacity = "1";
+  }
+
+  me.onChange = function(callback) {
+    onChangeCallbacks.push(callback);
+  };
+
+  var triggerOnChange = function() {
+    onChangeCallbacks.forEach(function(onChange) {
+      onChange();
+    });
+  };
+
+  var clearBody = function() {
+    if (tbody) {
+      table.removeChild(tbody);
+      tbody = null;
+    }
+  };
+
+  var renderBody = function(clear) {
+    cachedPagedTableClientWidth = pagedTable.clientWidth
+
+    var fragment = document.createDocumentFragment();
+
+    var pageData = data.slice(page.getRowStart(), page.getRowEnd());
+
+    pageData.forEach(function(dataRow, idxRow) {
+      var htmlRow = document.createElement("tr");
+      htmlRow.setAttribute("class", (idxRow % 2 !==0) ? "even" : "odd");
+
+      if (columns.hasMoreLeftColumns())
+        htmlRow.appendChild(document.createElement("td"));
+
+      columns.subset.forEach(function(columnData) {
+        var cellName = columnData.name;
+        var dataCell = dataRow[cellName];
+        var htmlCell = document.createElement("td");
+
+        if (dataCell === "NA") htmlCell.setAttribute("class", "pagedtable-na-cell");
+        if (dataCell === "__NA__") dataCell = "NA";
+
+        var cellText = document.createTextNode(dataCell);
+        htmlCell.appendChild(cellText);
+        if (dataCell.length > 50) {
+          htmlCell.setAttribute("title", dataCell);
+        }
+        htmlCell.setAttribute("align", columnData.align);
+        htmlCell.style.textAlign = columnData.align;
+        htmlCell.style.maxWidth = maxColumnWidth(null);
+        if (columnData.width) {
+          htmlCell.style.minWidth = htmlCell.style.maxWidth = maxColumnWidth(columnData.width);
+        }
+        htmlRow.appendChild(htmlCell);
+      });
+
+      for (var idx = 0; idx < columns.getPaddingCount(); idx++) {
+        var paddingCol = document.createElement("td");
+        paddingCol.setAttribute("class", "pagedtable-padding-col");
+        htmlRow.appendChild(paddingCol);
+      }
+
+      if (columns.hasMoreRightColumns())
+        htmlRow.appendChild(document.createElement("td"));
+
+      fragment.appendChild(htmlRow);
+    });
+
+    for (var idxPadding = 0; idxPadding < page.getPaddingRows(); idxPadding++) {
+      var paddingRow = document.createElement("tr");
+
+      var paddingCellRow = document.createElement("td");
+      paddingCellRow.innerHTML = "&nbsp;";
+      paddingCellRow.setAttribute("colspan", "100%");
+      paddingRow.appendChild(paddingCellRow);
+
+      fragment.appendChild(paddingRow);
+    }
+
+    if (typeof(clear) == "undefined" || clear) clearBody();
+    tbody = document.createElement("tbody");
+    tbody.appendChild(fragment);
+
+    table.appendChild(tbody);
+  };
+
+  var getLabelInfo = function() {
+    var pageStart = page.getRowStart();
+    var pageEnd = page.getRowEnd();
+    var totalRows = data.length;
+
+    var totalRowsLabel = options.rows.total ? options.rows.total : totalRows;
+    var totalRowsLabelFormat = totalRowsLabel.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+
+    var infoText = (pageStart + 1) + "-" + pageEnd + " of " + totalRowsLabelFormat + " rows";
+    if (totalRows < page.rows) {
+      infoText = totalRowsLabel + " row" + (totalRows != 1 ? "s" : "");
+    }
+    if (columns.total > columns.visible) {
+      var totalColumnsLabel = options.columns.total ? options.columns.total : columns.total;
+
+      infoText = infoText + " | " + (columns.number + 1) + "-" +
+        (Math.min(columns.number + columns.visible, columns.total)) +
+        " of " + totalColumnsLabel + " columns";
+    }
+
+    return infoText;
+  };
+
+  var clearFooter = function() {
+    footer = pagedTable.querySelectorAll("div.pagedtable-footer")[0];
+    footer.innerHTML = "";
+
+    return footer;
+  };
+
+  var createPageLink = function(idxPage) {
+    var pageLink = document.createElement("a");
+    pageLinkClass = idxPage === page.number ? "pagedtable-index pagedtable-index-current" : "pagedtable-index";
+    pageLink.setAttribute("class", pageLinkClass);
+    pageLink.setAttribute("data-page-index", idxPage);
+    pageLink.onclick = function() {
+      page.setPageNumber(parseInt(this.getAttribute("data-page-index")));
+      renderBody();
+      renderFooter();
+
+      triggerOnChange();
+    };
+
+    pageLink.appendChild(document.createTextNode(idxPage + 1));
+
+    return pageLink;
+  }
+
+  var renderFooter = function() {
+    footer = clearFooter();
+
+    var next = document.createElement("a");
+    next.appendChild(document.createTextNode("Next"));
+    next.onclick = function() {
+      page.setPageNumber(page.number + 1);
+      renderBody();
+      renderFooter();
+
+      triggerOnChange();
+    };
+    if (data.length > page.rows) footer.appendChild(next);
+
+    var pageNumbers = document.createElement("div");
+    pageNumbers.setAttribute("class", "pagedtable-indexes");
+
+    var pageRange = page.getVisiblePageRange();
+
+    if (pageRange.first) {
+      var pageLink = createPageLink(0);
+      pageNumbers.appendChild(pageLink);
+
+      var pageSeparator = document.createElement("div");
+      pageSeparator.setAttribute("class", "pagedtable-index-separator-left");
+      pageSeparator.appendChild(document.createTextNode("..."))
+      pageNumbers.appendChild(pageSeparator);
+    }
+
+    for (var idxPage = pageRange.start; idxPage < pageRange.end; idxPage++) {
+      var pageLink = createPageLink(idxPage);
+
+      pageNumbers.appendChild(pageLink);
+    }
+
+    if (pageRange.last) {
+      var pageSeparator = document.createElement("div");
+      pageSeparator.setAttribute("class", "pagedtable-index-separator-right");
+      pageSeparator.appendChild(document.createTextNode("..."))
+      pageNumbers.appendChild(pageSeparator);
+
+      var pageLink = createPageLink(page.total - 1);
+      pageNumbers.appendChild(pageLink);
+    }
+
+    if (data.length > page.rows) footer.appendChild(pageNumbers);
+
+    var previous = document.createElement("a");
+    previous.appendChild(document.createTextNode("Previous"));
+    previous.onclick = function() {
+      page.setPageNumber(page.number - 1);
+      renderBody();
+      renderFooter();
+
+      triggerOnChange();
+    };
+    if (data.length > page.rows) footer.appendChild(previous);
+
+    var infoLabel = document.createElement("div");
+    infoLabel.setAttribute("class", "pagedtable-info");
+    infoLabel.setAttribute("title", getLabelInfo());
+    infoLabel.appendChild(document.createTextNode(getLabelInfo()));
+    footer.appendChild(infoLabel);
+
+    var enabledClass = "pagedtable-index-nav";
+    var disabledClass = "pagedtable-index-nav pagedtable-index-nav-disabled";
+    previous.setAttribute("class", page.number <= 0 ? disabledClass : enabledClass);
+    next.setAttribute("class", (page.number + 1) * page.rows >= data.length ? disabledClass : enabledClass);
+  };
+
+  var measuresCell = null;
+
+  var renderMeasures = function() {
+    var measuresTable = document.createElement("table");
+    measuresTable.style.visibility = "hidden";
+    measuresTable.style.position = "absolute";
+    measuresTable.style.whiteSpace = "nowrap";
+    measuresTable.style.height = "auto";
+    measuresTable.style.width = "auto";
+
+    var measuresRow = document.createElement("tr");
+    measuresTable.appendChild(measuresRow);
+
+    measuresCell = document.createElement("td");
+    var sampleString = "ABCDEFGHIJ0123456789";
+    measuresCell.appendChild(document.createTextNode(sampleString));
+
+    measuresRow.appendChild(measuresCell);
+
+    tableDiv.appendChild(measuresTable);
+  }
+
+  me.init = function() {
+    tableDiv = document.createElement("div");
+    pagedTable.appendChild(tableDiv);
+    var pagedTableClass = data.length > 0 ?
+      "pagedtable pagedtable-not-empty" :
+      "pagedtable pagedtable-empty";
+
+    if (columns.total == 0 || (columns.emptyNames() && data.length == 0)) {
+      pagedTableClass = pagedTableClass + " pagedtable-empty-columns";
+    }
+
+    tableDiv.setAttribute("class", pagedTableClass);
+
+    renderMeasures();
+    measurer.calculate(measuresCell);
+    columns.calculateWidths(measurer.measures);
+
+    table = document.createElement("table");
+    table.setAttribute("cellspacing", "0");
+    table.setAttribute("class", "table table-condensed");
+    tableDiv.appendChild(table);
+
+    table.appendChild(document.createElement("thead"));
+
+    var footerDiv = document.createElement("div");
+    footerDiv.setAttribute("class", "pagedtable-footer");
+    tableDiv.appendChild(footerDiv);
+
+    // if the host has not yet provided horizontal space, render hidden
+    if (tableDiv.clientWidth <= 0) {
+      tableDiv.style.opacity = "0";
+    }
+
+    me.render();
+
+    // retry seizing columns later if the host has not provided space
+    function retryFit() {
+      if (tableDiv.clientWidth <= 0) {
+        setTimeout(retryFit, 100);
+      } else {
+        me.render();
+        triggerOnChange();
+      }
+    }
+    if (tableDiv.clientWidth <= 0) {
+      retryFit();
+    }
+  };
+
+  var registerWidths = function() {
+    columns.subset = columns.subset.map(function(column) {
+      column.width = columns.widths[column.name].inner;
+      return column;
+    });
+  };
+
+  var parsePadding = function(value) {
+    return parseInt(value) >= 0 ? parseInt(value) : 0;
+  };
+
+  me.fixedHeight = function() {
+    return options.rows.max != null;
+  }
+
+  me.fitRows = function() {
+    if (me.fixedHeight())
+      return;
+
+    measurer.calculate(measuresCell);
+
+    var rows = options.rows.min !== null ? options.rows.min : 0;
+    var headerHeight = header !== null && header.offsetHeight > 0 ? header.offsetHeight : 0;
+    var footerHeight = footer !== null && footer.offsetHeight > 0 ? footer.offsetHeight : 0;
+
+    if (pagedTable.offsetHeight > 0) {
+      var availableHeight = pagedTable.offsetHeight - headerHeight - footerHeight;
+      rows = Math.floor((availableHeight) / measurer.measures.height);
+    }
+
+    rows = options.rows.min !== null ? Math.max(options.rows.min, rows) : rows;
+
+    page.setRows(rows);
+  }
+
+  // The goal of this function is to add as many columns as possible
+  // starting from left-to-right, when the right most limit is reached
+  // it tries to add columns from the left as well.
+  //
+  // When startBackwards is true columns are added from right-to-left
+  me.fitColumns = function(startBackwards) {
+    measurer.calculate(measuresCell);
+    columns.calculateWidths(measurer.measures);
+
+    if (tableDiv.clientWidth > 0) {
+      tableDiv.style.opacity = 1;
+    }
+
+    var visibleColumns = tableDiv.clientWidth <= 0 ? Math.max(columns.min, 1) : 1;
+    var columnNumber = columns.number;
+    var paddingCount = 0;
+
+    // track a list of added columns as we build the visible ones to allow us
+    // to remove columns when they don't fit anymore.
+    var columnHistory = [];
+
+    var lastTableHeight = 0;
+    var backwards = startBackwards;
+
+    var tableDivStyle = window.getComputedStyle(tableDiv, null);
+    var tableDivPadding = parsePadding(tableDivStyle.paddingLeft) +
+      parsePadding(tableDivStyle.paddingRight);
+
+    var addPaddingCol = false;
+    var currentWidth = 0;
+
+    while (true) {
+      columns.setVisibleColumns(columnNumber, visibleColumns, paddingCount);
+      currentWidth = columns.getWidth();
+
+      if (tableDiv.clientWidth - tableDivPadding < currentWidth) {
+        break;
+      }
+
+      columnHistory.push({
+        columnNumber: columnNumber,
+        visibleColumns: visibleColumns,
+        paddingCount: paddingCount
+      });
+
+      if (columnHistory.length > 100) {
+        console.error("More than 100 tries to fit columns, aborting");
+        break;
+      }
+
+      if (columns.max !== null &&
+        columns.visible + columns.getPaddingCount() >= columns.max) {
+        break;
+      }
+
+      // if we run out of right-columns
+      if (!backwards && columnNumber + columns.visible >= columns.total) {
+        // if we started adding right-columns, try adding left-columns
+        if (!startBackwards && columnNumber > 0) {
+          backwards = true;
+        }
+        else if (columns.min === null || visibleColumns + columns.getPaddingCount() >= columns.min) {
+          break;
+        }
+        else {
+          paddingCount = paddingCount + 1;
+        }
+      }
+
+      // if we run out of left-columns
+      if (backwards && columnNumber == 0) {
+        // if we started adding left-columns, try adding right-columns
+        if (startBackwards && columnNumber + columns.visible < columns.total) {
+          backwards = false;
+        }
+        else if (columns.min === null || visibleColumns + columns.getPaddingCount() >= columns.min) {
+          break;
+        }
+        else {
+          paddingCount = paddingCount + 1;
+        }
+      }
+
+      // when moving backwards try fitting left columns first
+      if (backwards && columnNumber > 0) {
+        columnNumber = columnNumber - 1;
+      }
+
+      if (columnNumber + visibleColumns < columns.total) {
+        visibleColumns = visibleColumns + 1;
+      }
+    }
+
+    var lastRenderableColumn = {
+        columnNumber: columnNumber,
+        visibleColumns: visibleColumns,
+        paddingCount: paddingCount
+    };
+
+    if (columnHistory.length > 0) {
+      lastRenderableColumn = columnHistory[columnHistory.length - 1];
+    }
+
+    columns.setVisibleColumns(
+      lastRenderableColumn.columnNumber,
+      lastRenderableColumn.visibleColumns,
+      lastRenderableColumn.paddingCount);
+
+    if (pagedTable.offsetWidth > 0) {
+      page.setVisiblePages(Math.max(Math.ceil(1.0 * (pagedTable.offsetWidth - 250) / 40), 2));
+    }
+
+    registerWidths();
+  };
+
+  me.fit = function(startBackwards) {
+    me.fitRows();
+    me.fitColumns(startBackwards);
+  }
+
+  me.render = function() {
+    me.fitColumns(false);
+
+    // render header/footer to measure height accurately
+    renderHeader();
+    renderFooter();
+
+    me.fitRows();
+    renderBody();
+
+    // re-render footer to match new rows
+    renderFooter();
+  }
+
+  var resizeLastWidth = -1;
+  var resizeLastHeight = -1;
+  var resizeNewWidth = -1;
+  var resizeNewHeight = -1;
+  var resizePending = false;
+
+  me.resize = function(newWidth, newHeight) {
+
+    function resizeDelayed() {
+      resizePending = false;
+
+      if (
+        (resizeNewWidth !== resizeLastWidth) ||
+        (!me.fixedHeight() && resizeNewHeight !== resizeLastHeight)
+      ) {
+        resizeLastWidth = resizeNewWidth;
+        resizeLastHeight = resizeNewHeight;
+
+        setTimeout(resizeDelayed, 200);
+        resizePending = true;
+      } else {
+        me.render();
+        triggerOnChange();
+
+        resizeLastWidth = -1;
+        resizeLastHeight = -1;
+      }
+    }
+
+    resizeNewWidth = newWidth;
+    resizeNewHeight = newHeight;
+
+    if (!resizePending) resizeDelayed();
+  };
+};
+
+var PagedTableDoc;
+(function (PagedTableDoc) {
+  var allPagedTables = [];
+
+  PagedTableDoc.initAll = function() {
+    allPagedTables = [];
+
+    var pagedTables = [].slice.call(document.querySelectorAll('[data-pagedtable="false"],[data-pagedtable=""]'));
+    pagedTables.forEach(function(pagedTable, idx) {
+      pagedTable.setAttribute("data-pagedtable", "true");
+      pagedTable.setAttribute("pagedtable-page", 0);
+      pagedTable.setAttribute("class", "pagedtable-wrapper");
+
+      var pagedTableInstance = new PagedTable(pagedTable);
+      pagedTableInstance.init();
+
+      allPagedTables.push(pagedTableInstance);
+    });
+  };
+
+  PagedTableDoc.resizeAll = function() {
+    allPagedTables.forEach(function(pagedTable) {
+      pagedTable.render();
+    });
+  };
+
+  window.addEventListener("resize", PagedTableDoc.resizeAll);
+
+  return PagedTableDoc;
+})(PagedTableDoc || (PagedTableDoc = {}));
+
+window.onload = function() {
+  PagedTableDoc.initAll();
+};
+</script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -202,105 +1473,93 @@ code span.ot { color: #007020; }
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>()</span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(col_types) <span class="ot">&lt;-</span> <span class="fu">names</span>(col_types_table)</span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>col_types</span></code></pre></div>
 <pre><code>## character   logical   numeric   POSIXct    POSIXt 
 ##       158        85       197         7         7</code></pre>
 <p>As can be seen there are only four col types: numeric, character,
 logical, and date (POSIX).</p>
 <p>Cols with type POSIX.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">str_which</span>(col_types_all, <span class="st">&quot;POSIX&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code></pre></div>
-<pre><code>## # A tibble: 6 × 433
-##    ...1 document.id vhash            authentihash times_submitted harmless_votes
-##   &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;            &lt;lgl&gt;                  &lt;dbl&gt;          &lt;dbl&gt;
-## 1     1           1 f6e2a738ceaceee… NA                         1              0
-## 2     2           1 c33ffb46f726546… NA                         1              0
-## 3     3           1 1a58d637c33d1ae… NA                         1              0
-## 4     4           1 adf394a76f5cf8a… NA                       263             18
-## 5     5           1 f6e2a738ceaceee… NA                         1              0
-## 6     6           1 e28950e70606b10… NA                         1              0
-## # … with 427 more variables: malicious_votes &lt;dbl&gt;, sha256 &lt;chr&gt;, type &lt;chr&gt;,
-## #   scan_id &lt;chr&gt;, unique_sources &lt;dbl&gt;, positives &lt;dbl&gt;, ssdeep &lt;chr&gt;,
-## #   md5 &lt;chr&gt;, permalink &lt;chr&gt;, sha1 &lt;chr&gt;, response_code &lt;dbl&gt;,
-## #   community_reputation &lt;dbl&gt;, verbose_msg &lt;chr&gt;, last_seen &lt;dttm&gt;,
-## #   additional_info.trid &lt;chr&gt;, submission.date &lt;dttm&gt;,
-## #   submission.submitter_country &lt;chr&gt;, submission.filename &lt;chr&gt;,
-## #   additional_info.exiftool.ZipCRC &lt;chr&gt;, …</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">str_which</span>(col_types_all, <span class="st">&quot;POSIX&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paged_table</span>()</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["scan_date"],"name":[1],"type":["dttm"],"align":["right"]},{"label":["first_seen"],"name":[2],"type":["dttm"],"align":["right"]},{"label":["total"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["size"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["additional_info.magic"],"name":[5],"type":["chr"],"align":["left"]},{"label":["submission.submitter_region"],"name":[6],"type":["chr"],"align":["left"]},{"label":["additional_info.exiftool.MIMEType"],"name":[7],"type":["chr"],"align":["left"]},{"label":["additional_info.exiftool.ZipRequiredVersion"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["additional_info.compressedview.extensions.dex"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["additional_info.compressedview.extensions.xml"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["additional_info.compressedview.extensions.jpg"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["additional_info.compressedview.extensions.SF"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["scans.Elastic.update"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["scans.AVG.detected"],"name":[14],"type":["lgl"],"align":["right"]}],"data":[{"1":"2021-11-03 08:53:57","2":"2021-11-03 08:53:57","3":"61","4":"1956125","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:26:03","2":"2021-11-03 00:26:03","3":"61","4":"2667641","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:12:06","2":"2021-11-03 08:12:06","3":"61","4":"3998656","5":"Zip archive data, at least v2.0 to extract","6":"63","7":"application/zip","8":"20","9":"1","10":"353","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:44:36","2":"2015-01-20 23:53:18","3":"64","4":"500276","5":"Zip archive data, at least v2.0 to extract","6":"d","7":"application/zip","8":"20","9":"1","10":"25","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 08:54:32","2":"2021-11-03 08:54:32","3":"62","4":"1956125","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:22:50","2":"2021-11-03 08:22:50","3":"61","4":"4137920","5":"Zip archive data, at least v2.0 to extract","6":"63","7":"application/zip","8":"20","9":"1","10":"353","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:43:10","2":"2021-06-03 18:29:36","3":"61","4":"3031864","5":"Zip archive data, at least v2.0 to extract","6":"30","7":"application/zip","8":"20","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 00:25:19","2":"2021-11-03 00:25:19","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:19:30","2":"2021-11-03 00:19:30","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:00:30","2":"2017-11-28 15:53:18","3":"60","4":"5884","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:53:39","2":"2021-09-13 03:45:21","3":"62","4":"3035859","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"1","10":"415","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 00:45:24","2":"2021-11-03 00:45:24","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:44:15","2":"2021-11-03 08:44:15","3":"63","4":"15202016","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"7","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:54:34","2":"2021-11-03 07:54:34","3":"63","4":"8041344","5":"Zip archive data","6":"?","7":"application/zip","8":"0","9":"1","10":"316","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 09:16:16","2":"2018-07-07 07:04:03","3":"59","4":"307908","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 08:16:40","2":"2021-11-03 08:16:40","3":"63","4":"20353542","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"2","10":"445","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:54:29","2":"2021-10-18 08:50:50","3":"62","4":"6122860","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 00:00:26","2":"2021-11-03 00:00:26","3":"58","4":"4804233","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:37:21","2":"2021-11-03 00:37:21","3":"60","4":"1955983","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:00:20","2":"2019-10-01 03:13:27","3":"56","4":"48204","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:50:10","2":"2016-12-03 11:18:21","3":"53","4":"366676","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 00:45:04","2":"2021-11-03 00:45:04","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:40:40","2":"2015-04-07 10:32:52","3":"59","4":"1674660","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:46:27","2":"2017-10-27 21:12:27","3":"59","4":"424720","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:55:42","2":"2013-09-11 08:40:27","3":"63","4":"394574","5":"Zip archive data, at least v2.0 to extract","6":"62","7":"application/zip","8":"20","9":"1","10":"21","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:39:47","2":"2018-04-16 22:03:40","3":"59","4":"5888","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:39:19","2":"2019-09-01 04:43:45","3":"60","4":"7116","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:00:41","2":"2017-08-18 16:45:45","3":"59","4":"17476","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:40:00","2":"2021-01-16 23:49:02","3":"63","4":"7032582","5":"Zip archive data, at least v2.0 to extract","6":"jal","7":"application/zip","8":"20","9":"5","10":"271","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:39:44","2":"2018-04-03 07:07:46","3":"59","4":"6004","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:10:40","2":"2021-11-03 00:10:40","3":"63","4":"8801847","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"2","10":"446","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:46:10","2":"2017-12-28 05:51:06","3":"59","4":"774024","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:08:52","2":"2021-11-03 00:08:52","3":"56","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:16:18","2":"2021-11-03 08:16:18","3":"61","4":"30711904","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"6","10":"122","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 08:24:09","2":"2021-08-03 12:09:52","3":"62","4":"4506129","5":"Zip archive data","6":"l","7":"application/zip","8":"0","9":"1","10":"436","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:50:25","2":"2016-12-14 08:41:42","3":"59","4":"6160","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:28:49","2":"2021-11-03 08:28:49","3":"60","4":"2947134","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"214","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:54:48","2":"2021-10-18 02:40:12","3":"62","4":"6122893","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 08:32:38","2":"2021-11-03 08:32:38","3":"62","4":"1956249","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:18:57","2":"2021-10-20 13:54:49","3":"64","4":"3903113","5":"Zip archive data, at least v2.0 to extract","6":"62","7":"application/zip","8":"20","9":"1","10":"139","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 09:15:59","2":"2021-11-03 09:15:59","3":"62","4":"543672","5":"Zip archive data, at least v2.0 to extract","6":"ca","7":"application/zip","8":"20","9":"1","10":"46","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:16:20","2":"2018-07-13 05:59:16","3":"59","4":"5884","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:54:09","2":"2021-10-21 10:15:18","3":"61","4":"6126959","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 07:44:23","2":"2016-01-06 01:51:40","3":"59","4":"1156","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:22:12","2":"2015-08-12 17:10:54","3":"62","4":"860113","5":"Zip archive data, at least v2.0 to extract","6":"he","7":"application/zip","8":"20","9":"1","10":"3","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:19:22","2":"2021-11-03 00:19:22","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:15:31","2":"2021-11-03 08:15:31","3":"62","4":"1955964","5":"Zip archive data","6":"jal","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:46:00","2":"2021-11-03 00:46:00","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:14:16","2":"2021-11-03 09:14:16","3":"60","4":"15721098","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:33:53","2":"2019-09-08 03:35:40","3":"62","4":"63071192","5":"Zip archive data, at least v2.0 to extract","6":"eng","7":"application/zip","8":"20","9":"NA","10":"NA","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 00:01:05","2":"2021-11-03 00:01:05","3":"63","4":"4804236","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:21:38","2":"2021-11-03 08:21:38","3":"61","4":"601452","5":"Zip archive data, at least v2.0 to extract","6":"ca","7":"application/zip","8":"20","9":"1","10":"19","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:55:52","2":"2021-09-13 06:50:57","3":"59","4":"3035852","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"1","10":"415","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 09:13:09","2":"2021-11-03 09:13:09","3":"61","4":"1956174","5":"Zip archive data","6":"c","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:28:18","2":"2021-11-03 00:28:18","3":"63","4":"14898946","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:45:37","2":"2021-11-03 08:45:37","3":"62","4":"10186","5":"Zip archive data, at least v2.0 to extract","6":"mh","7":"application/zip","8":"20","9":"1","10":"1","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:12:18","2":"2017-03-05 15:29:33","3":"59","4":"1156","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:03:59","2":"2021-11-03 08:03:59","3":"63","4":"15410862","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"4","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:34:18","2":"2019-01-27 06:15:44","3":"60","4":"153424","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:55:19","2":"2021-10-22 23:35:21","3":"64","4":"3394334","5":"Zip archive data","6":"62","7":"application/zip","8":"0","9":"1","10":"411","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 07:39:52","2":"2015-05-09 02:35:41","3":"59","4":"214120","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:50:15","2":"2016-12-24 15:14:13","3":"59","4":"17984","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:38:33","2":"2019-05-13 04:00:23","3":"59","4":"7108008","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:37:40","2":"2021-11-03 07:37:40","3":"60","4":"107759215","5":"Zip archive data, at least v2.0 to extract","6":"?","7":"application/zip","8":"20","9":"1","10":"410","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:02:16","2":"2015-02-06 17:44:14","3":"61","4":"183459","5":"Zip archive data, at least v2.0 to extract","6":"he","7":"application/zip","8":"20","9":"1","10":"3","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:28:10","2":"2021-11-03 00:28:10","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:33:19","2":"2021-11-03 08:33:19","3":"62","4":"1956249","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:21:56","2":"2021-11-03 08:21:56","3":"63","4":"3758923","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"788","9":"1","10":"19","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:46:24","2":"2021-11-03 08:46:24","3":"59","4":"1998932","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:55:40","2":"2021-10-19 04:55:25","3":"62","4":"6122862","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 07:56:08","2":"2017-11-18 01:30:57","3":"59","4":"5904","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:38:41","2":"2021-10-23 15:26:09","3":"59","4":"2111216","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:40:14","2":"2015-06-04 08:59:13","3":"58","4":"621512","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:27:26","2":"2021-11-03 00:27:26","3":"59","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:21:06","2":"2015-05-26 01:53:26","3":"63","4":"14498070","5":"Zip archive data, at least v2.0 to extract","6":"he","7":"application/zip","8":"20","9":"NA","10":"226","11":"6","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:40:52","2":"2016-08-15 05:53:10","3":"59","4":"7612932","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 00:19:25","2":"2021-11-03 00:19:25","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:06:25","2":"2021-11-03 08:06:25","3":"62","4":"699499","5":"Zip archive data, at least v1.0 to extract","6":"d","7":"application/zip","8":"10","9":"2","10":"21","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:51:57","2":"2016-10-28 05:09:58","3":"58","4":"4531604","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 08:12:09","2":"2020-02-05 08:27:22","3":"60","4":"586168","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:06:24","2":"2021-11-03 08:06:24","3":"63","4":"8728803","5":"Zip archive data","6":"?","7":"application/zip","8":"0","9":"1","10":"316","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:46:53","2":"2021-11-03 08:46:53","3":"62","4":"2249530","5":"Zip archive data","6":"on","7":"application/zip","8":"0","9":"1","10":"183","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:44:14","2":"2017-05-25 14:27:13","3":"58","4":"730228","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 00:25:46","2":"2021-11-03 00:25:46","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:30:37","2":"2021-11-03 08:30:37","3":"61","4":"178355426","5":"Zip archive data, at least v2.0 to extract","6":"kir","7":"application/zip","8":"20","9":"1","10":"91","11":"NA","12":"NA","13":"20211005","14":"TRUE"},{"1":"2021-11-03 08:40:13","2":"2021-11-03 08:40:13","3":"59","4":"20316","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:50:12","2":"2016-06-15 18:39:32","3":"60","4":"332868","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:46:05","2":"2021-11-03 07:46:05","3":"62","4":"773772","5":"Zip archive data, at least v2.0 to extract","6":"?","7":"application/zip","8":"20","9":"1","10":"175","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:40:04","2":"2018-04-06 06:35:31","3":"59","4":"6012","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:13:36","2":"2021-11-03 09:13:36","3":"63","4":"14941837","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 07:52:13","2":"2016-01-30 10:19:53","3":"59","4":"1152","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:40:00","2":"2017-10-27 12:02:22","3":"59","4":"1914076","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:39:27","2":"2019-01-27 15:37:29","3":"60","4":"560344","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:40:11","2":"2018-08-07 23:47:10","3":"60","4":"5884","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:17:42","2":"2021-11-03 00:17:42","3":"63","4":"4804230","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:40:21","2":"2018-01-03 15:40:44","3":"59","4":"6000","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:44:11","2":"2015-06-01 05:49:59","3":"58","4":"674204","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:49:58","2":"2021-11-03 07:49:58","3":"60","4":"2678380","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:27:19","2":"2021-11-03 08:27:19","3":"59","4":"2228618","5":"Zip archive data","6":"on","7":"application/zip","8":"0","9":"1","10":"183","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:26:19","2":"2021-11-03 00:26:19","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:14:01","2":"2021-11-03 09:14:01","3":"60","4":"356169","5":"Zip archive data, at least v2.0 to extract","6":"wb","7":"application/zip","8":"20","9":"1","10":"5","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:40:25","2":"2018-01-09 04:16:36","3":"60","4":"5996","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:06:44","2":"2018-06-30 02:26:29","3":"63","4":"53604603","5":"Zip archive data, at least v2.0 to extract","6":"?","7":"application/zip","8":"20","9":"1","10":"160","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 09:24:18","2":"2017-03-14 20:20:29","3":"58","4":"787644","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:17:09","2":"2021-11-03 08:17:09","3":"63","4":"21035680","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"471","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 00:28:16","2":"2021-11-03 00:28:16","3":"53","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:26:07","2":"2021-11-03 00:26:07","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:25:14","2":"2021-11-03 09:25:14","3":"62","4":"14898948","5":"Zip archive data, at least v2.0 to extract","6":"d","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:00:04","2":"2021-11-03 08:00:04","3":"62","4":"1975464","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"108","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:52:59","2":"2021-10-20 00:56:21","3":"60","4":"6122851","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 08:58:14","2":"2019-11-29 00:24:50","3":"59","4":"4385200","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 08:22:22","2":"2021-11-03 08:22:22","3":"59","4":"3916196","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:37:49","2":"2021-11-03 00:37:49","3":"59","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:38:43","2":"2021-11-03 08:38:43","3":"61","4":"2249617","5":"Zip archive data","6":"on","7":"application/zip","8":"0","9":"1","10":"183","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:31:47","2":"2021-11-03 08:31:47","3":"62","4":"2111871","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:06:13","2":"2018-01-18 11:53:01","3":"59","4":"5988","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:28:35","2":"2018-05-18 01:46:26","3":"60","4":"5892","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:06:25","2":"2021-11-03 08:06:25","3":"59","4":"586008","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:04:19","2":"2021-11-03 08:04:19","3":"63","4":"14898951","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 09:00:13","2":"2017-08-06 05:32:54","3":"59","4":"659384","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:27:16","2":"2021-11-03 00:27:16","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:06:09","2":"2017-11-20 04:30:10","3":"59","4":"6008","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:56:14","2":"2017-06-16 08:36:48","3":"59","4":"6040","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:28:15","2":"2021-11-03 08:28:15","3":"62","4":"1719960","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"43","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:53:30","2":"2021-10-22 12:02:25","3":"63","4":"3390238","5":"Zip archive data","6":"62","7":"application/zip","8":"0","9":"1","10":"411","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 00:19:33","2":"2021-11-03 00:19:33","3":"56","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:27:16","2":"2021-11-03 08:27:16","3":"62","4":"2667888","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:27:35","2":"2021-11-03 00:27:35","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:20:52","2":"2021-11-03 08:20:52","3":"60","4":"2667641","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:35:56","2":"2021-11-03 00:35:56","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:53:47","2":"2021-11-03 07:53:47","3":"63","4":"14909972","5":"Zip archive data, at least v2.0 to extract","6":"41","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:06:27","2":"2021-10-07 05:55:23","3":"59","4":"2150408","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 08:53:57","2":"2021-11-03 08:53:57","3":"62","4":"1956125","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:31:34","2":"2021-11-03 00:31:34","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:53:50","2":"2021-09-12 02:34:46","3":"62","4":"3357189","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"1","10":"415","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 08:39:03","2":"2021-11-03 08:39:03","3":"64","4":"3421363","5":"Zip archive data","6":"on","7":"application/zip","8":"0","9":"1","10":"254","11":"1","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 07:52:22","2":"2019-07-24 03:58:46","3":"58","4":"10898768","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:52:39","2":"2021-10-24 12:31:54","3":"64","4":"3394319","5":"Zip archive data","6":"62","7":"application/zip","8":"0","9":"1","10":"411","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 00:31:03","2":"2021-11-03 00:31:03","3":"58","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:40:18","2":"2019-01-25 08:16:16","3":"59","4":"1913112","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 08:37:57","2":"2021-11-03 08:37:57","3":"62","4":"2667641","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:12:27","2":"2018-03-01 18:26:47","3":"60","4":"5996","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:00:37","2":"2017-12-17 11:36:32","3":"52","4":"5900","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 09:01:19","2":"2021-11-03 09:01:19","3":"57","4":"4804230","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:43:29","2":"2021-11-03 08:43:29","3":"62","4":"1956297","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:34:35","2":"2018-11-12 14:06:22","3":"60","4":"5880","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 00:25:15","2":"2021-11-03 00:25:15","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:19:41","2":"2021-11-03 00:19:41","3":"62","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:40:07","2":"2017-11-26 01:51:32","3":"59","4":"6000","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:00:52","2":"2021-11-03 09:00:52","3":"62","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:22:25","2":"2017-07-17 13:07:00","3":"59","4":"5888","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:12:48","2":"2021-10-20 08:44:12","3":"57","4":"7225742","5":"Zip archive data","6":"?","7":"application/zip","8":"0","9":"1","10":"421","11":"1","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 00:21:08","2":"2021-11-03 00:21:08","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:23:29","2":"2021-11-03 08:23:29","3":"61","4":"1956101","5":"Zip archive data","6":"dl","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:04:45","2":"2014-02-23 02:22:08","3":"58","4":"34424","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"NA"},{"1":"2021-11-03 07:56:23","2":"2021-10-19 13:37:27","3":"62","4":"6122901","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 00:25:14","2":"2021-11-03 00:25:14","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:56:18","2":"2021-11-03 07:56:18","3":"62","4":"8043761","5":"Zip archive data, at least v1.0 to extract","6":"?","7":"application/zip","8":"10","9":"1","10":"316","11":"NA","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 00:26:11","2":"2021-11-03 00:26:11","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 08:41:30","2":"2021-11-03 08:41:30","3":"62","4":"824232","5":"Zip archive data, at least v2.0 to extract","6":"hdf","7":"application/zip","8":"20","9":"1","10":"175","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:52:28","2":"2021-10-19 13:53:09","3":"62","4":"6122902","5":"Zip archive data, at least v1.0 to extract","6":"62","7":"application/zip","8":"10","9":"2","10":"411","11":"NA","12":"NA","13":"20211005","14":"NA"},{"1":"2021-11-03 08:21:46","2":"2019-06-17 11:13:57","3":"62","4":"1928652","5":"Zip archive data","6":"s","7":"application/zip","8":"0","9":"1","10":"36","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:01:28","2":"2021-11-03 09:01:28","3":"61","4":"1955964","5":"Zip archive data","6":"11","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:56:03","2":"2021-10-24 07:14:49","3":"63","4":"3394284","5":"Zip archive data","6":"62","7":"application/zip","8":"0","9":"1","10":"411","11":"NA","12":"1","13":"20211005","14":"TRUE"},{"1":"2021-11-03 08:00:54","2":"2021-11-03 08:00:54","3":"62","4":"1975464","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"108","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:20:31","2":"2021-11-03 09:20:31","3":"63","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:18:46","2":"2021-11-03 09:18:46","3":"61","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:17:00","2":"2021-11-03 08:17:00","3":"61","4":"1467913","5":"Zip archive data, at least v2.0 to extract","6":"?","7":"application/zip","8":"20","9":"1","10":"410","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:20:03","2":"2021-11-03 00:20:03","3":"61","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:56:11","2":"2012-12-18 03:26:17","3":"59","4":"6392","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:58:50","2":"2021-11-03 08:58:50","3":"61","4":"4804233","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:30:36","2":"2021-11-03 08:30:36","3":"62","4":"2667888","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 00:36:04","2":"2021-11-03 00:36:04","3":"60","4":"2669106","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"3","10":"2","11":"NA","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:39:56","2":"2018-09-05 12:42:53","3":"60","4":"2795296","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:23:25","2":"2021-11-03 08:23:25","3":"63","4":"15645802","5":"Zip archive data, at least v2.0 to extract","6":"NA","7":"application/zip","8":"20","9":"3","10":"275","11":"3","12":"1","13":"20211005","14":"NA"},{"1":"2021-11-03 09:00:45","2":"2021-11-03 09:00:45","3":"60","4":"4804237","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 07:50:05","2":"2021-11-03 07:50:05","3":"62","4":"1956078","5":"Zip archive data","6":"ca","7":"application/zip","8":"0","9":"1","10":"104","11":"1","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 07:46:12","2":"2015-04-15 10:15:15","3":"59","4":"11212","5":"Dalvik dex file version 035","6":"jm","7":"application/octet-stream","8":"NA","9":"NA","10":"NA","11":"NA","12":"NA","13":"NA","14":"TRUE"},{"1":"2021-11-03 09:20:54","2":"2021-11-03 09:20:54","3":"63","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-01 15:38:30","2":"2021-11-01 15:38:30","3":"62","4":"1513084","5":"Zip archive data, at least v2.0 to extract","6":"?","7":"application/zip","8":"20","9":"1","10":"142","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:30:58","2":"2017-03-20 21:27:22","3":"62","4":"1629650","5":"Zip archive data, at least v2.0 to extract","6":"l","7":"application/zip","8":"20","9":"1","10":"6","11":"13","12":"1","13":"NA","14":"NA"},{"1":"2021-11-03 09:20:46","2":"2021-11-03 09:20:46","3":"62","4":"4804234","5":"Zip archive data, at least v2.0 to extract","6":"on","7":"application/zip","8":"20","9":"1","10":"137","11":"NA","12":"1","13":"NA","14":"TRUE"},{"1":"2021-11-03 08:46:17","2":"2021-11-03 08:46:17","3":"62","4":"2369760","5":"Zip archive data, at least v1.0 to extract","6":"on","7":"application/zip","8":"10","9":"1","10":"183","11":"1","12":"1","13":"NA","14":"NA"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 <p>The colums</p>
 </div>
 <div id="na" class="section level3">
 <h3>NA</h3>
 <div id="percentaje-of-na-values" class="section level4">
 <h4>Percentaje of NA values</h4>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>num_of_NA <span class="ot">&lt;-</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  is.na <span class="sc">%&gt;%</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  sum</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>num_of_values <span class="ot">&lt;-</span> </span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  dim <span class="sc">%&gt;%</span> </span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  prod</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>NA_percentaje <span class="ot">&lt;-</span> </span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  (num_of_NA <span class="sc">/</span> num_of_values) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  percent</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>num_of_NA <span class="ot">&lt;-</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  is.na <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  sum</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>num_of_values <span class="ot">&lt;-</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  dim <span class="sc">%&gt;%</span> </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  prod</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>NA_percentaje <span class="ot">&lt;-</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  (num_of_NA <span class="sc">/</span> num_of_values) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  percent</span></code></pre></div>
 <pre><code>## [1] &quot;37%&quot;</code></pre>
 </div>
 <div id="columns-with-na" class="section level4">
 <h4>Columns with NA</h4>
 <p>Colums with NA.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>num_of_NA_by_column <span class="ot">&lt;-</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  is.na <span class="sc">%&gt;%</span> </span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colSums</span>()</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>num_of_NA_by_column <span class="ot">&lt;-</span> </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  num_of_NA_by_column[num_of_NA_by_column<span class="sc">!=</span><span class="dv">0</span>]</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>names_of_colums_with_NA <span class="ot">&lt;-</span> </span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(num_of_NA_by_column)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>num_of_cols_with_NA <span class="ot">&lt;-</span> </span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  num_of_NA_by_column <span class="sc">%&gt;%</span> </span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>()</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>percentaje_of_cols_with_NA <span class="ot">&lt;-</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  (num_of_cols_with_NA <span class="sc">/</span> <span class="fu">ncol</span>(df)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  percent</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>num_of_NA_by_column <span class="ot">&lt;-</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  is.na <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colSums</span>()</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>num_of_NA_by_column <span class="ot">&lt;-</span> </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  num_of_NA_by_column[num_of_NA_by_column<span class="sc">!=</span><span class="dv">0</span>]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>names_of_colums_with_NA <span class="ot">&lt;-</span> </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(num_of_NA_by_column)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>num_of_cols_with_NA <span class="ot">&lt;-</span> </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  num_of_NA_by_column <span class="sc">%&gt;%</span> </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>()</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>percentaje_of_cols_with_NA <span class="ot">&lt;-</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  (num_of_cols_with_NA <span class="sc">/</span> <span class="fu">ncol</span>(df)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  percent</span></code></pre></div>
 <pre><code>## [1] &quot;Number of colums with NA values: 330&quot;</code></pre>
 <pre><code>## [1] &quot;Percentaje of colums with NA values: 74%&quot;</code></pre>
 <p>Numeric colums with NA.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>num_of_numeric_cols_with_NA <span class="ot">&lt;-</span> </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(anyNA) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ncol</span>()</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>percentaje_of_numeric_cols_with_NA <span class="ot">&lt;-</span> </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  (num_of_numeric_cols_with_NA <span class="sc">/</span> <span class="fu">ncol</span>(df)) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">percent</span>()</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>names_of_numeric_colums_with_NA <span class="ot">&lt;-</span> </span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(anyNA) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>num_of_numeric_cols_with_NA <span class="ot">&lt;-</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(anyNA) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ncol</span>()</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>percentaje_of_numeric_cols_with_NA <span class="ot">&lt;-</span> </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  (num_of_numeric_cols_with_NA <span class="sc">/</span> <span class="fu">ncol</span>(df)) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">percent</span>()</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>names_of_numeric_colums_with_NA <span class="ot">&lt;-</span> </span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(anyNA) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>()</span></code></pre></div>
 <pre><code>## [1] &quot;Number of numeric colums with NA values: 153&quot;</code></pre>
 <pre><code>## [1] &quot;Percentaje of numeric colums with NA values: 34%&quot;</code></pre>
 <p>Inspect if there are columns full of NA.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>is_full_of_NA <span class="ot">&lt;-</span> <span class="cf">function</span>(col){</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  num_of_NA <span class="ot">&lt;-</span> </span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    col <span class="sc">%&gt;%</span> </span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>()</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(num_of_NA <span class="sc">==</span> <span class="fu">length</span>(col))</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cols_full_of_NA <span class="ot">&lt;-</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is_full_of_NA) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>is_full_of_NA <span class="ot">&lt;-</span> <span class="cf">function</span>(col){</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  num_of_NA <span class="ot">&lt;-</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    col <span class="sc">%&gt;%</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">is.na</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>()</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(num_of_NA <span class="sc">==</span> <span class="fu">length</span>(col))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cols_full_of_NA <span class="ot">&lt;-</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is_full_of_NA) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>()</span></code></pre></div>
 <pre><code>##  [1] &quot;authentihash&quot;                  &quot;scans.Bkav.result&quot;            
 ##  [3] &quot;scans.CMC.result&quot;              &quot;scans.ALYac.result&quot;           
 ##  [5] &quot;scans.Malwarebytes.result&quot;     &quot;scans.K7AntiVirus.result&quot;     
@@ -319,70 +1578,70 @@ logical, and date (POSIX).</p>
 <h3>Cols full of NA</h3>
 <p>As can be seen there are many columns that are full of NA, so can be
 deleted.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(cols_full_of_NA))</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(cols_full_of_NA))</span></code></pre></div>
 </div>
 </div>
 <div id="replace-na-for-0-into-permissions-colums" class="section level2">
 <h2>Replace NA for 0 into permissions colums</h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>df_permissions <span class="ot">&lt;-</span> </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(., <span class="fu">str_which</span>(<span class="fu">colnames</span>(.), <span class="st">&quot;additional_info.androguard.RiskIndicator.PERM&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="cf">function</span>(col) <span class="fu">replace_na</span>(col, <span class="dv">0</span>))</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>df_without_permissions <span class="ot">&lt;-</span> </span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(., <span class="sc">-</span><span class="fu">c</span>(<span class="fu">str_which</span>(<span class="fu">colnames</span>(.), <span class="st">&quot;additional_info.androguard.RiskIndicator.PERM&quot;</span>)))</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df_permissions, df_without_permissions)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>df_permissions <span class="ot">&lt;-</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(., <span class="fu">str_which</span>(<span class="fu">colnames</span>(.), <span class="st">&quot;additional_info.androguard.RiskIndicator.PERM&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="cf">function</span>(col) <span class="fu">replace_na</span>(col, <span class="dv">0</span>))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>df_without_permissions <span class="ot">&lt;-</span> </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(., <span class="sc">-</span><span class="fu">c</span>(<span class="fu">str_which</span>(<span class="fu">colnames</span>(.), <span class="st">&quot;additional_info.androguard.RiskIndicator.PERM&quot;</span>)))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df_permissions, df_without_permissions)</span></code></pre></div>
 </div>
 <div id="as-factor" class="section level2">
 <h2>As factor</h2>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> </span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(n){</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">5</span>){</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;very low&quot;</span>, <span class="st">&quot;low&quot;</span>, <span class="st">&quot;medium&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;very high&quot;</span>))</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">4</span>){</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;very low&quot;</span>, <span class="st">&quot;low&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;very high&quot;</span>))</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">3</span>){</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;low&quot;</span>, <span class="st">&quot;medium&quot;</span>, <span class="st">&quot;high&quot;</span>))</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">2</span>){</span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;low&quot;</span>, <span class="st">&quot;high&quot;</span>))</span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">&quot;Not avalible&quot;</span>)</span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>cut_by_quantiles <span class="ot">&lt;-</span> </span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(col){</span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    quantiles <span class="ot">&lt;-</span> </span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>      col <span class="sc">%&gt;%</span> </span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">quantile</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unique</span>()</span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(quantiles) <span class="sc">&gt;</span> <span class="dv">2</span>){</span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>      col <span class="ot">&lt;-</span> </span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>        col <span class="sc">%&gt;%</span> </span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cut</span>(<span class="at">breaks =</span> quantiles, <span class="at">labels =</span> <span class="fu">labels</span>(<span class="fu">length</span>(quantiles)<span class="sc">-</span><span class="dv">1</span>))</span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(col)</span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>df_cut_by_quantiles <span class="ot">&lt;-</span> </span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df){</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>    df_without_numeric <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">is.numeric</span>(df)]</span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>    df_numeric <span class="ot">&lt;-</span> </span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span> </span>
-<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select_if</span>(is.numeric)</span>
-<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>    df_numeric <span class="ot">&lt;-</span> </span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>      df_numeric <span class="sc">%&gt;%</span> </span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lapply</span>(cut_by_quantiles)</span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">cbind</span>(df_without_numeric, df_numeric))</span>
-<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a>df_test <span class="ot">&lt;-</span> </span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">df_cut_by_quantiles</span>(df)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(n){</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">5</span>){</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;very low&quot;</span>, <span class="st">&quot;low&quot;</span>, <span class="st">&quot;medium&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;very high&quot;</span>))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">4</span>){</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;very low&quot;</span>, <span class="st">&quot;low&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;very high&quot;</span>))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">3</span>){</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;low&quot;</span>, <span class="st">&quot;medium&quot;</span>, <span class="st">&quot;high&quot;</span>))</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span> <span class="cf">if</span>(n <span class="sc">==</span> <span class="dv">2</span>){</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(<span class="st">&quot;low&quot;</span>, <span class="st">&quot;high&quot;</span>))</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">&quot;Not avalible&quot;</span>)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>cut_by_quantiles <span class="ot">&lt;-</span> </span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(col){</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    quantiles <span class="ot">&lt;-</span> </span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>      col <span class="sc">%&gt;%</span> </span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">quantile</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unique</span>()</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(quantiles) <span class="sc">&gt;</span> <span class="dv">2</span>){</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>      col <span class="ot">&lt;-</span> </span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>        col <span class="sc">%&gt;%</span> </span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cut</span>(<span class="at">breaks =</span> quantiles, <span class="at">labels =</span> <span class="fu">labels</span>(<span class="fu">length</span>(quantiles)<span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(col)</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>df_cut_by_quantiles <span class="ot">&lt;-</span> </span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df){</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>    df_without_numeric <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">is.numeric</span>(df)]</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>    df_numeric <span class="ot">&lt;-</span> </span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span> </span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select_if</span>(is.numeric)</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>    df_numeric <span class="ot">&lt;-</span> </span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>      df_numeric <span class="sc">%&gt;%</span> </span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lapply</span>(cut_by_quantiles)</span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">cbind</span>(df_without_numeric, df_numeric))</span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>df_test <span class="ot">&lt;-</span> </span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">df_cut_by_quantiles</span>(df)</span></code></pre></div>
 </div>
 </div>
 </section>
