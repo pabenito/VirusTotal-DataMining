@@ -235,10 +235,10 @@ replace_na_which_colname_match <-
 
 ```{r}
 replace_na_when <- 
-  function(df, exp, replacement){
+  function(df, fun, replacement){
     cols_to_replace <- 
       df %>% 
-      select_if(function(col) eval.parent(exp, col)) %>% 
+      select_if(fun) %>% 
       colnames()
     df_replaced_cols <- 
       df %>% 
