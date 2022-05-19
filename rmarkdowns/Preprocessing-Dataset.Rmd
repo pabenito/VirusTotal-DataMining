@@ -175,6 +175,39 @@ sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_
 sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
 ```
 
+Inspect if there are columns full of NA.
+
+```{r}
+is_full_of_NA <- function(col){
+  num_of_NA <- 
+    col %>% 
+    is.na() %>% 
+    sum()
+  return(num_of_NA == length(col))
+}
+```
+
+```{r}
+cols_full_of_NA <- 
+  df %>% 
+  select_if(is_full_of_NA) %>% 
+  names()
+```
+```{r echo=FALSE}
+cols_full_of_NA
+```
+## Remove colums
+
+### Cols full of NA
+
+As can be seen there are many columns that are full of NA, so can be deleted.
+
+```{r}
+df <- 
+  df %>% 
+  select(-all_of(cols_full_of_NA))
+```
+
 ## Replace NA for 0 into permissions colums
 
 ```{r}
