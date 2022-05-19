@@ -24,26 +24,31 @@ library(tidyverse)
 virus <- read_csv('../VirusTotal/data/virusTotal.csv')
 
  
-lista <- list(additional_info.androguard.RiskIndicator.PERM.DANGEROUS = 0,
-              additional_info.androguard.RiskIndicator.PERM.GPS = 0,
-              additional_info.androguard.RiskIndicator.PERM.NORMAL = 0,
-              additional_info.androguard.RiskIndicator.PERM.PRIVACY = 0,
-              additional_info.androguard.RiskIndicator.PERM.INTERNET = 0,
-              additional_info.androguard.RiskIndicator.PERM.INSTANT = 0,
-              additional_info.androguard.RiskIndicator.PERM.SMS = 0,
-              additional_info.androguard.RiskIndicator.PERM.MONEY = 0,
-              additional_info.androguard.RiskIndicator.PERM.SYSTEM = 0,
-              additional_info.androguard.RiskIndicator.PERM.CALL = 0,
-              additional_info.androguard.RiskIndicator.PERM.SIGNATURE = 0,
-              additional_info.androguard.RiskIndicator.PERM.DEVELOPMENT = 0,
-              additional_info.androguard.RiskIndicator.PERM.PRE23 = 0,
-              additional_info.androguard.RiskIndicator.PERM.APPOP = 0,
-              additional_info.androguard.RiskIndicator.PERM.EPHEMERAL = 0,
-              additional_info.androguard.RiskIndicator.PERM.PREINSTALLED = 0,
-              additional_info.androguard.RiskIndicator.PERM.INSTALLER = 0,
-              additional_info.androguard.RiskIndicator.PERM.RUNTIME = 0)
 
-virus <- replace_na(virus, lista)
+replace_na_which_colname_match <- 
+  function(df, pattern, replacement){
+    cols_to_replace <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+
+pattern <- "additional_info.androguard.RiskIndicator.PERM"
+
+virus <- 
+  virus %>% 
+  replace_na_which_colname_match(pattern, 0)
+
+
+
 
 ```
 
@@ -72,28 +77,53 @@ rules <- virus %>%
              ))
 View(rules)
 
+labels <- 
+  function(n){
+    if(n == 5){
+      return(c("very low", "low", "medium", "high", "very high"))
+    }else if(n == 4){
+      return(c("very low", "low", "high", "very high"))
+    }else if(n == 3){
+      return(c("low", "medium", "high"))
+    }else if(n == 2){
+      return(c("low", "high"))
+    }else{
+      stop("Not avalible")
+    }
+  }
+
 cut_by_quantiles <- 
   function(col){
-    labels <- c("very low", "low", "medium", "high", "very high")
-    col %>% 
-      sapply(., cut(breaks = quantile(.), labels = labels))
+    quantiles <- 
+      col %>% 
+      na.omit() %>% 
+      quantile() %>% 
+      unique()
+    if(length(quantiles) > 2){
+      col <- 
+        col %>% 
+        cut(breaks = quantiles, labels = labels(length(quantiles)-1), include.lowest = TRUE)
+    }
+    return(col)
   }
 
 df_cut_by_quantiles <- 
   function(df){
-    df_without_numeric <- df[!is.numeric(df)]
+    df_without_numeric <- 
+      df[sapply(df, function(col) !is.numeric(col))]
     df_numeric <- 
+      df %>% 
       select_if(is.numeric)
     df_numeric <- 
       df_numeric %>% 
       lapply(cut_by_quantiles)
-    cbind(df_without_numeric, df_numeric)
+    return(cbind(df_without_numeric, df_numeric))
   }
 
 df_test <- 
   rules  %>% 
   df_cut_by_quantiles()
-
+View(f_test)
 
 ```
 
