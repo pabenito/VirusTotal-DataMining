@@ -298,13 +298,14 @@ cut_by_quantiles <-
   function(col){
     quantiles <- 
       col %>% 
-      na.omit() %>% 
-      quantile() %>% 
+      quantile(na.rm = TRUE) %>% 
       unique()
     if(length(quantiles) > 2){
       col <- 
         col %>% 
-        cut(breaks = quantiles, labels = labels(length(quantiles)-1))
+        cut(breaks = quantiles, 
+            labels = labels(length(quantiles)-1),
+            include.lowest = TRUE)
     }
     return(col)
   }
@@ -322,6 +323,7 @@ df_cut_by_quantiles <-
     return(cbind(df_without_numeric, df_numeric))
   }
 ```
+
 
 
 
