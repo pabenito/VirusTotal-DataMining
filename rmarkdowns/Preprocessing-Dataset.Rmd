@@ -114,7 +114,7 @@ NA_percentaje
 
 #### Columns with NA
 
-Colums with NA.
+Columns with NA.
 
 ```{r}
 num_of_NA_by_column <- 
@@ -197,9 +197,31 @@ df <-
 
 #### Colums with the same value
 
-```{r}
+Maybe there are columns that has the same value along all the vector, so are useless.
 
+Define function to remove these columns.
+
+```{r}
+remove_columns_with_the_same_value <- 
+  function(df)
+      select_if(df, function(col) length(unique(col)) > 1)
 ```
+
+Apply function.
+
+```{r}
+df_test <- 
+  remove_columns_with_the_same_value(df)
+```
+
+Calculate the number of columns deleted.
+
+```{r}
+ncol(df) - ncol(df_test) 
+```
+
+Awesom! 
+
 
 
 ## Inspecting dataframe
@@ -323,6 +345,24 @@ df_cut_by_quantiles <-
     return(cbind(df_without_numeric, df_numeric))
   }
 ```
+
+## Col total permissions
+
+```{r}
+pattern <- "additional_info.androguard.RiskIndicator.PERM"
+
+df_without_permissions <- 
+  df %>% 
+  select(., -(str_which(colnames(.), pattern)))
+
+df_permissions <- 
+  df %>% 
+  select(., str_which(colnames(.), pattern)) %>% 
+  mutate(., total_PERMs = rowSums(.))
+
+df <- cbind(df_without_permissions, df_permissions)
+```
+
 
 
 
