@@ -93,48 +93,63 @@ As can be seen there are the three expected types: character, double and logical
 
 #### Percentaje of NA values
 
+Define function to see the amount of NA values in the dataframe. 
+
 ```{r}
-num_of_NA <- 
-  df %>% 
-  is.na %>% 
-  sum
-
-num_of_values <- 
-  df %>% 
-  dim %>% 
-  prod
-
-NA_percentaje <- 
-  (num_of_NA / num_of_values) %>% 
-  percent
+percent_of_NA <- 
+  function(df){
+    num_of_NA <- 
+      df %>% is.na() %>% sum()
+    num_of_values <- 
+      df %>% dim() %>% prod()
+    percent_of_NA <- 
+      (num_of_NA / num_of_values) %>% 
+      percent()
+    return(percent_of_NA)
+  }
 ```
-```{r echo=FALSE}
-NA_percentaje
+
+```{r}
+percent_of_NA(df)
 ```
 
 #### Columns with NA
 
-Columns with NA.
+Define functions to see the NA in columns.
 
 ```{r}
 num_of_NA_by_column <- 
-  df %>% 
-  is.na %>% 
-  colSums()
+  function(df){
+    df %>% is.na() %>% colSums()
+  }
+```
 
-num_of_NA_by_column <- 
-  num_of_NA_by_column[num_of_NA_by_column!=0]
+```{r}
+remove_0 <- 
+  function(x) x[x!=0]
+```
 
+```{r}
 names_of_colums_with_NA <- 
-  names(num_of_NA_by_column)
+  function(df)
+    df %>% 
+      num_of_NA_by_column() %>% 
+      remove_0 %>% 
+      names()
+```
 
-num_of_cols_with_NA <- 
-  num_of_NA_by_column %>% 
-  length()
-
+```{r}
 percentaje_of_cols_with_NA <-
-  (num_of_cols_with_NA / ncol(df)) %>% 
-  percent
+  function(df)
+    (num_of_NA_by_column(df) / ncol(df)) %>% 
+    percent()
+```
+
+
+```{r}
+names_of_colums_with_NA(df)
+
+percentaje_of_cols_with_NA()
 ```
 ```{r echo=FALSE}
 sprintf("Number of colums with NA values: %d", num_of_cols_with_NA)
