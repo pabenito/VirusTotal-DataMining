@@ -308,6 +308,8 @@ df <- cbind(df_without_permissions, df_permissions)
 
 ### Removing cols
 
+There are many duplicated cols, hashes & dates that can be removed. 
+
 #### Dates
 
 There are many dates in the dataset, that are not relevant for virus analysis. 
@@ -365,21 +367,63 @@ df <-
 
 #### Scans
 
-There are many scans of different antivirus, that has the same information.
+There are many scans of different antivirus, that has very similar information.
+Just keep the scan with less NA values.
+
+Get the best col.
 
 ```{r}
+scans_col_names <- 
+  df %>% 
+  colnames() %>% 
+  str_match_all("scans.[:alpha:]*.result") %>% 
+  unlist()
 
+scan_na_by_col <- 
+  df %>% 
+  select(all_of(scans_col_names)) %>%
+  num_of_NA_by_column()
+
+scan_col_witch_min_na <- 
+  scan_na_by_col %>% 
+  which.min()
+
+best_scanner_colname <- 
+  scan_na_by_col %>% 
+  names() %>% 
+  get_element(scan_col_witch_min_na)
+
+best_scanner_col <- 
+  df %>% 
+  select(best_scanner_colname)
+
+best_scanner_name <- 
+  best_scanner_colname %>% 
+  str_split("[.]") %>% 
+  unlist() %>% 
+  get_element(2)
+```
+```{r echo=FALSE}
+sprintf("Best scan col: %s", best_scanner_colname)
+sprintf("Best scanner: %s", best_scanner_name)
 ```
 
 
-There are many duplicated cols, hashes, dates, 
+Drop all scans but the best.
 
 ```{r}
-cols_to_delete <- c(
-  
-)
-```
+col_index_scanners <- 
+  df %>% 
+  colnames() %>% 
+  str_detect("scans") %>%
+  unlist() %>% 
+  which()
 
+df <- 
+  df %>% 
+  select(-all_of(col_index_scanners)) %>% 
+  cbind(best_scanner_col)
+```
 
 ## Save dataframe
 
