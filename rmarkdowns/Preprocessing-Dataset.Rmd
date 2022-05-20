@@ -50,10 +50,16 @@ library(stringr)
 
 ## Load dataset
 
+Set the path of the dataframe file.
+
+```{r}
+path = "../virusTotal/data/virusTotal.csv"
+```
+
 Load dataset.
 
 ```{r message=FALSE}
-df <- read_csv("../virusTotal/data/virusTotal.csv")
+df <- read_csv(path)
 ```
 
 ## Statistics
@@ -292,6 +298,14 @@ df_permissions <-
   mutate(., total_PERMs = rowSums(.))
 
 df <- cbind(df_without_permissions, df_permissions)
+```
+
+## Save dataframe
+
+After all preprocessing let's save it into CSV.
+
+```{r eval=FALSE}
+write.csv(df, path)
 ```
 
 ## Functions for preprocessing
