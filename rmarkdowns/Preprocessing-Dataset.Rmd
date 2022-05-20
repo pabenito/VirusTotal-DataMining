@@ -141,44 +141,16 @@ names_of_colums_with_NA <-
 ```{r}
 percentaje_of_cols_with_NA <-
   function(df)
-    (num_of_NA_by_column(df) / ncol(df)) %>% 
+    (length(names_of_colums_with_NA(df)) / ncol(df)) %>% 
     percent()
 ```
 
+Compute the percentaje of cols with NA.
 
 ```{r}
-names_of_colums_with_NA(df)
-
-percentaje_of_cols_with_NA()
-```
-```{r echo=FALSE}
-sprintf("Number of colums with NA values: %d", num_of_cols_with_NA)
-sprintf("Percentaje of colums with NA values: %s", as.character(percentaje_of_cols_with_NA))
+percentaje_of_cols_with_NA(df)
 ```
 
-Numeric colums with NA.
-
-```{r}
-num_of_numeric_cols_with_NA <- 
-  df %>% 
-  select_if(is.numeric) %>% 
-  select_if(anyNA) %>% 
-  ncol()
-
-percentaje_of_numeric_cols_with_NA <- 
-  (num_of_numeric_cols_with_NA / ncol(df)) %>% 
-  percent()
-
-names_of_numeric_colums_with_NA <- 
-  df %>% 
-  select_if(is.numeric) %>% 
-  select_if(anyNA) %>% 
-  colnames()
-```
-```{r echo=FALSE}
-sprintf("Number of numeric colums with NA values: %d", num_of_numeric_cols_with_NA)
-sprintf("Percentaje of numeric colums with NA values: %s", as.character(percentaje_of_numeric_cols_with_NA))
-```
 Inspect if there are columns full of NA.
 
 ```{r}
