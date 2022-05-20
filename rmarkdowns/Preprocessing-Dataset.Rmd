@@ -173,7 +173,6 @@ cols_full_of_NA <-
 cols_full_of_NA
 ```
 
-
 As can be seen there are many columns that are full of NA, so can be deleted.
 
 ```{r}
@@ -197,19 +196,24 @@ remove_columns_with_the_same_value <-
 Apply function.
 
 ```{r}
-df_test <- 
-  remove_columns_with_the_same_value(df)
+num_of_cols_after_remove <- 
+  df %>% 
+  remove_columns_with_the_same_value() %>% 
+  ncol()
 ```
 
-Calculate the number of columns deleted.
+Calculate the number of columns with same value.
 
 ```{r}
-ncol(df) - ncol(df_test) 
+ncol(df) - num_of_cols_after_remove
 ```
+Awesom! Many colums found. 
+Let's remove them.
 
-Awesom! 
-
-
+```{r}
+df <- 
+  remove_columns_with_the_same_value(df)
+```
 
 ## Inspecting dataframe
 
