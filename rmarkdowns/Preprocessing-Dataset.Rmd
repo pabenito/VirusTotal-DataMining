@@ -193,9 +193,15 @@ Maybe there are columns that has the same value along all the vector, so are use
 Define function to remove these columns.
 
 ```{r}
+different_values <- 
+  function(x)
+    x %>% na.omit() %>% unique() %>% length()
+```
+
+```{r}
 remove_columns_with_the_same_value <- 
   function(df)
-      select_if(df, function(col) length(unique(col)) > 1)
+      select_if(df, function(col) different_values(col) > 1)
 ```
 
 Apply function.
