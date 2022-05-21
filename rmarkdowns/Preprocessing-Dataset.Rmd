@@ -416,7 +416,8 @@ df <-
     -additional_info.exiftool.ZipFileName,
     -additional_info.magic,
     -additional_info.androguard.Package,
-    -additional_info.androguard.certificate.Subject.DN
+    -additional_info.androguard.certificate.Subject.DN,
+    -additional_info.compressedview.uncompressed_size
   )
 ```
 
@@ -638,6 +639,22 @@ df <-
   df %>% 
   select(-which(mp3_cols_logical)) %>% 
   mutate(additional_info.compressedview.file_types.MP3 = mp3_col)
+```
+
+### Express increased uncompressed size as percentage
+
+There are two columns that refers to ZIP size, one for the compressed size and the other for the uncompressed size. It would be easier to compare them with the percentage of size increased after decompressed it.  
+
+```{r}
+increased_size_after_unzip <- 
+  df$additional_info.exiftool.ZipUncompressedSize / 
+  df$additional_info.exiftool.ZipCompressedSize
+
+df <- 
+  df %>% 
+  select(-additional_info.exiftool.ZipUncompressedSize,
+         -additional_info.exiftool.ZipCompressedSize) %>% 
+  mutate(additional_info.exiftool.ZipIncreasedUncompressedSize = increased_size_after_unzip)
 ```
 
 ### View results
