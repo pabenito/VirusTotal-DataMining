@@ -19,10 +19,16 @@ library(stringr)
 library(tidyverse)
 ```
 
+### Import of the VirusTotal dataset.
+
+```{r import, include=FALSE}
+virus <- read_csv('../VirusTotal/data/virusTotal.csv')
+```
+
+### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
 ```{r lectura, include=FALSE}
 virus <- read_csv('../VirusTotal/data/virusTotal.csv')
-
  
 
 replace_na_which_colname_match <- 
@@ -52,11 +58,12 @@ virus <-
 
 ```
 
-
+### We select the rules.
 
 ```{r lectura, include=FALSE}
 rules <- virus %>%
-   select(c(additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
+   select(c( positives,
+             additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
              additional_info.androguard.RiskIndicator.PERM.GPS,
              additional_info.androguard.RiskIndicator.PERM.NORMAL,
              additional_info.androguard.RiskIndicator.PERM.PRIVACY,
@@ -76,6 +83,13 @@ rules <- virus %>%
              additional_info.androguard.RiskIndicator.PERM.RUNTIME
              ))
 View(rules)
+```
+
+### We will discretize the values using quantiles.
+
+### The function does not apply to columns with few values, as they do not provide much information.
+
+```{r lectura, include=FALSE}
 
 labels <- 
   function(n){
@@ -123,13 +137,33 @@ df_cut_by_quantiles <-
 df_test <- 
   rules  %>% 
   df_cut_by_quantiles()
-View(f_test)
+View(df_test)
+```
+
+### We eliminate the untouched columns.
+
+```{r}
+df_discretize <- df_test %>% select(c( 1,2,4,5,8,9))
+View(df_discretize )
+```
+
+### We use the apriori method with standard confidence and support values.
+
+```{r}
+r1 <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
 
 ```
 
-
+    subrules <- subset(rules, lift>8)
 
 ```{r}
-r1 <- apriori(df_2, parameter = list(supp=0.01, conf=0.5))
-inspect(r1)
+inspect(head(r1))
+```
+
+```{r}
+library(arulesViz)
+subrules <- subset(r1, lift>3)
+
+plot(subrules, method="graph", engine="htmlwidget", 
+     igraphLayout = "layout_in_circle")
 ```
