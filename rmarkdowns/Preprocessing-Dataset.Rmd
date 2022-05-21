@@ -53,13 +53,14 @@ library(stringr)
 Set the path of the dataframe file.
 
 ```{r}
-path = "../virusTotal/data/virusTotal.csv"
+path_import = "../virusTotal/data/virusTotalOriginal.csv"
+path_export = "../virusTotal/data/virusTotal.csv"
 ```
 
 Load dataset.
 
 ```{r message=FALSE}
-df <- read_csv(path)
+df <- read_csv(path_import)
 ```
 
 ## Statistics
@@ -618,7 +619,7 @@ paged_table(df)
 After all preprocessing let's save it into CSV.
 
 ```{r eval=FALSE}
-write.csv(df, path)
+write.csv(df, path_export)
 ```
 
 ## Functions for preprocessing
