@@ -19,39 +19,51 @@ library(stringr)
 library(tidyverse)
 ```
 
+### Import of the VirusTotal dataset.
+
+```{r import, include=FALSE}
+virus <- read_csv('../VirusTotal/data/virusTotal.csv')
+```
+
+### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
 ```{r lectura, include=FALSE}
 virus <- read_csv('../VirusTotal/data/virusTotal.csv')
-
  
-lista <- list(additional_info.androguard.RiskIndicator.PERM.DANGEROUS = 0,
-              additional_info.androguard.RiskIndicator.PERM.GPS = 0,
-              additional_info.androguard.RiskIndicator.PERM.NORMAL = 0,
-              additional_info.androguard.RiskIndicator.PERM.PRIVACY = 0,
-              additional_info.androguard.RiskIndicator.PERM.INTERNET = 0,
-              additional_info.androguard.RiskIndicator.PERM.INSTANT = 0,
-              additional_info.androguard.RiskIndicator.PERM.SMS = 0,
-              additional_info.androguard.RiskIndicator.PERM.MONEY = 0,
-              additional_info.androguard.RiskIndicator.PERM.SYSTEM = 0,
-              additional_info.androguard.RiskIndicator.PERM.CALL = 0,
-              additional_info.androguard.RiskIndicator.PERM.SIGNATURE = 0,
-              additional_info.androguard.RiskIndicator.PERM.DEVELOPMENT = 0,
-              additional_info.androguard.RiskIndicator.PERM.PRE23 = 0,
-              additional_info.androguard.RiskIndicator.PERM.APPOP = 0,
-              additional_info.androguard.RiskIndicator.PERM.EPHEMERAL = 0,
-              additional_info.androguard.RiskIndicator.PERM.PREINSTALLED = 0,
-              additional_info.androguard.RiskIndicator.PERM.INSTALLER = 0,
-              additional_info.androguard.RiskIndicator.PERM.RUNTIME = 0)
 
-virus <- replace_na(virus, lista)
+replace_na_which_colname_match <- 
+  function(df, pattern, replacement){
+    cols_to_replace <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+
+pattern <- "additional_info.androguard.RiskIndicator.PERM"
+
+virus <- 
+  virus %>% 
+  replace_na_which_colname_match(pattern, 0)
+
+
+
 
 ```
 
-
+### We select the rules.
 
 ```{r lectura, include=FALSE}
 rules <- virus %>%
-   select(c(additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
+   select(c( positives,
+             additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
              additional_info.androguard.RiskIndicator.PERM.GPS,
              additional_info.androguard.RiskIndicator.PERM.NORMAL,
              additional_info.androguard.RiskIndicator.PERM.PRIVACY,
@@ -71,35 +83,87 @@ rules <- virus %>%
              additional_info.androguard.RiskIndicator.PERM.RUNTIME
              ))
 View(rules)
+```
+
+### We will discretize the values using quantiles.
+
+### The function does not apply to columns with few values, as they do not provide much information.
+
+```{r lectura, include=FALSE}
+
+labels <- 
+  function(n){
+    if(n == 5){
+      return(c("very low", "low", "medium", "high", "very high"))
+    }else if(n == 4){
+      return(c("very low", "low", "high", "very high"))
+    }else if(n == 3){
+      return(c("low", "medium", "high"))
+    }else if(n == 2){
+      return(c("low", "high"))
+    }else{
+      stop("Not avalible")
+    }
+  }
 
 cut_by_quantiles <- 
   function(col){
-    labels <- c("very low", "low", "medium", "high", "very high")
-    col %>% 
-      sapply(., cut(breaks = quantile(.), labels = labels))
+    quantiles <- 
+      col %>% 
+      na.omit() %>% 
+      quantile() %>% 
+      unique()
+    if(length(quantiles) > 2){
+      col <- 
+        col %>% 
+        cut(breaks = quantiles, labels = labels(length(quantiles)-1), include.lowest = TRUE)
+    }
+    return(col)
   }
 
 df_cut_by_quantiles <- 
   function(df){
-    df_without_numeric <- df[!is.numeric(df)]
+    df_without_numeric <- 
+      df[sapply(df, function(col) !is.numeric(col))]
     df_numeric <- 
+      df %>% 
       select_if(is.numeric)
     df_numeric <- 
       df_numeric %>% 
       lapply(cut_by_quantiles)
-    cbind(df_without_numeric, df_numeric)
+    return(cbind(df_without_numeric, df_numeric))
   }
 
 df_test <- 
   rules  %>% 
   df_cut_by_quantiles()
+View(df_test)
+```
 
+### We eliminate the untouched columns.
+
+```{r}
+df_discretize <- df_test %>% select(c( 1,2,4,5,8,9))
+View(df_discretize )
+```
+
+### We use the apriori method with standard confidence and support values.
+
+```{r}
+r1 <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
 
 ```
 
-
+    subrules <- subset(rules, lift>8)
 
 ```{r}
-r1 <- apriori(df_2, parameter = list(supp=0.01, conf=0.5))
-inspect(r1)
+inspect(head(r1))
+```
+
+```{r}
+library(arulesViz)
+subrules <- subset(r1, lift>3)
+
+plot(subrules, method="graph", engine="htmlwidget", 
+     igraphLayout = "layout_in_circle")
 ```
