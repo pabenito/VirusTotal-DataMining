@@ -232,7 +232,6 @@ Now let's deeply inspect into the dataframe.
 
 ```{r echo=FALSE}
 df %>% 
-  select(order(colnames(df))) %>% 
   paged_table()
 ```
 ### Renaming
@@ -324,7 +323,8 @@ df <-
     -ssdeep,
     -md5,
     -additional_info.androguard.certificate.serialnumber,
-    -additional_info.androguard.certificate.thumbprint
+    -additional_info.androguard.certificate.thumbprint,
+    -additional_info.exiftool.ZipCRC
   )
 ```
 
@@ -387,28 +387,16 @@ df <-
   cbind(best_scanner_col)
 ```
 
-#### Exiftool
-
-```{r}
-df <- 
-  df %>% 
-  select(
-    -additional_info.exiftool.MIMEType,
-    -additional_info.exiftool.ZipCRC,
-    -additional_info.exiftool.ZipFileName,
-    -additional_info.exiftool.ZipBitFlag,
-    -additional_info.magic
-  )
-```
-
 #### Individual columns
 
 **Reasons**:
 
-- json column contains all the row as JSON
-- permalink is the URL where Virus Total has the virus file
-- Main.Activity & Package are strings with all different values
-- FileTypeExtension has same values as FileType
+- json column contains all the row as JSON.
+- permalink is the URL where Virus Total has the virus file.
+- Main.Activity & Package are strings with all different values.
+- FileTypeExtension, ZipFileName & MIMEType has same values as FileType.
+- ZipBitFlag doesn't seems to matter.
+- additional_info.magic has the vesion of the ZIP file, that doesn't seems to matter.
 - Subject.DN is the JSON fragment that has all the information about the subject, but these data are decomposed in the rest of Subject cols.
 
 ```{r}
@@ -419,7 +407,10 @@ df <-
     -permalink,
     -additional_info.androguard.AndroidApplicationInfo,
     -additional_info.androguard.Main.Activity,
+    -additional_info.exiftool.MIMEType,
     -additional_info.exiftool.FileTypeExtension,
+    -additional_info.exiftool.ZipFileName,
+    -additional_info.magic,
     -additional_info.androguard.Package,
     -additional_info.androguard.certificate.Subject.DN
   )
@@ -458,12 +449,32 @@ df <-
   remove_cols_which_name_match("^additional_info.androguard.RiskIndicator.APK.[:alpha:]*$")
 ```
 
-### Sorting columns alphabetically
+### Sorting columns
+
+```{r}
+sort_cols <- 
+  function(df){
+    df <- 
+      df %>% 
+      select(order(colnames(df)))
+    additionalInfo_cols_logical <- 
+      df %>% 
+      colnames() %>% 
+      str_detect("additional_info")
+    additionalInfo_cols <- 
+      df %>% 
+      select(which(additionalInfo_cols_logical))
+    not_additionalInfo_cols <- 
+      df %>% 
+      select(which(!additionalInfo_cols_logical)) %>% 
+      select(n, size, everything())
+    return(cbind(not_additionalInfo_cols, additionalInfo_cols))
+  }
+```
 
 ```{r}
 df <- 
-  df %>% 
-  select(order(colnames(df)))
+  sort_cols(df)
 ```
 
 ## Replacing values
