@@ -233,8 +233,57 @@ Now let's deeply inspect into the dataframe.
 ```{r echo=FALSE}
 df %>% paged_table()
 ```
+### Replacing values
 
-### Permissions (PERM)
+#### Replace "Unknown" and "?" by NA
+
+There are some columns that hast the value "Unknown" or "?" instead of NAs. 
+So let's replace them.
+
+Define a function to replace values in cols that satisfy a predicate.
+
+```{r}
+replace_when <- 
+  function(df, fun, value, replacement){
+    cols_to_replace <- 
+      df %>% 
+      select_if(fun) %>% 
+      colnames()
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace(col, which(col==value), replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+```{r}
+fun <- function(col) sum(as.character(col)=="?", na.rm = TRUE) > 0
+df_test <- 
+  df %>% 
+  replace_when(df, fun, "?", NA) %>% 
+```
+
+```{r}
+fun <- 
+  function(col){
+    col_char <- 
+      as.character(col)
+    matches <- 
+      sum(col_char == "?" || col_char == "Unknown", na.rm = TRUE)
+    return(matches > 0)
+  }
+fun <- 
+  function(col) any(str_detect(col, "Unknown"))
+cols_to_replace <- 
+      df %>% 
+      select_if(fun) %>% 
+      colnames()
+```
+
 
 #### Replace NA for 0 into permissions colums
 
