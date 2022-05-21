@@ -233,9 +233,19 @@ Now let's deeply inspect into the dataframe.
 ```{r echo=FALSE}
 df %>% paged_table()
 ```
+### Renaming
+
+The column "...1" is the row number, so "n" will be a better name.
+
+```{r}
+df <- 
+  df %>% 
+  rename(n = ...1)
+```
+
 ### Removing cols
 
-There are many duplicated cols, hashes & dates that can be removed. 
+There are many duplicated cols, hashes & dates that can be removed, also many useless.
 
 #### Dates
 
@@ -309,23 +319,141 @@ df <-
     -sha1,
     -scan_id,
     -ssdeep,
-    -md5
+    -md5,
+    -additional_info.androguard.certificate.serialnumber,
+    -additional_info.androguard.certificate.thumbprint
   )
 ```
 
-### Renaming
+#### Scans
 
-The column "...1" is the row number, so "n" will be a better name.
+There are many scans of different antivirus, that has very similar information.
+Just keep the scan with less NA values.
+
+Get the best col.
+
+```{r}
+scans_col_names <- 
+  df %>% 
+  colnames() %>% 
+  str_match_all("scans.[:alpha:]*.result") %>% 
+  unlist()
+
+scan_na_by_col <- 
+  df %>% 
+  select(all_of(scans_col_names)) %>%
+  num_of_NA_by_column()
+
+scan_col_witch_min_na <- 
+  scan_na_by_col %>% 
+  which.min()
+
+best_scanner_colname <- 
+  scan_na_by_col %>% 
+  names() %>% 
+  get_element(scan_col_witch_min_na)
+
+best_scanner_col <- 
+  df %>% 
+  select(best_scanner_colname)
+
+best_scanner_name <- 
+  best_scanner_colname %>% 
+  str_split("[.]") %>% 
+  unlist() %>% 
+  get_element(2)
+```
+```{r echo=FALSE}
+sprintf("Best scan col: %s", best_scanner_colname)
+sprintf("Best scanner: %s", best_scanner_name)
+```
+
+Drop all scans but the best.
+
+```{r}
+col_index_scanners <- 
+  df %>% 
+  colnames() %>% 
+  str_detect("scans") %>%
+  unlist() %>% 
+  which()
+
+df <- 
+  df %>% 
+  select(-all_of(col_index_scanners)) %>% 
+  cbind(best_scanner_col)
+```
+
+#### Exiftool
 
 ```{r}
 df <- 
   df %>% 
-  rename(n = ...1)
+  select(
+    -additional_info.exiftool.MIMEType,
+    -additional_info.exiftool.ZipCRC,
+    -additional_info.exiftool.ZipFileName,
+    -additional_info.exiftool.ZipBitFlag,
+    -additional_info.magic,
+    -addi
+  )
 ```
 
-### Replacing values
+#### Individual columns
 
-#### Replace "Unknown" and "?" by NA
+There are many columns which have same information of others, or they are simply useless.
+Let's remove them.
+
+**Reasons**:
+
+- ...JSON column contains all the row as JSON
+- permalink is the URL where Virus Total has the virus file
+- Main.Activity & Package are strings with all different values
+- FileTypeExtension has same values as FileType
+
+```{r}
+df <- 
+  select(
+    -..JSON,
+    -permalink,
+    -additional_info.androguard.AndroidApplicationInfo,
+    -additional_info.androguard.Main.Activity,
+    -additional_info.exiftool.FileTypeExtension,
+    -additional_info.androguard.Package
+  )
+```
+
+
+```{r}
+remove_cols_which_name_match <- 
+  function(df, pattern){
+    cols_to_remove <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_removed_cols <- 
+      df %>% 
+      select(-all_of(cols_to_remove))
+    return(df_removed_cols)
+  }
+```
+
+Issuer group has the same information as Subject group.
+CompressedView and RiskIndicator.APK groups have the same information as file_type group
+
+```{r}
+df <- 
+  df %>% 
+  remove_cols_which_name_match("^additional_info.androguard.certificate.Issuer.[:alpha:]*$") %>% 
+  remove_cols_which_name_match("^additional_info.compressedview.extensions.[:alpha:]*$") %>% 
+  remove_cols_which_name_match("^additional_info.androguard.RiskIndicator.APK.[:alpha:]*$")
+```
+
+
+
+## Replacing values
+
+### Replace "Unknown" and "?" by NA
 
 There are some columns that hast the value "Unknown" or "?" instead of NAs. 
 So let's replace them.
@@ -359,8 +487,9 @@ df <-
   replace_when(function(col) any(str_detect(col, fixed("?"))), "?", NA)
 ```
 
+### Replace NA for 0
 
-#### Replace NA for 0 into permissions colums
+#### Permissions colums
 
 The permissions columns (PERM) seems that there are NAs where there should be 0s. 
 So it would be better to replace them.
@@ -428,66 +557,6 @@ df_permissions <-
   mutate(., total_PERMs = rowSums(.))
 
 df <- cbind(df_without_permissions, df_permissions)
-```
-
-#### Scans
-
-There are many scans of different antivirus, that has very similar information.
-Just keep the scan with less NA values.
-
-Get the best col.
-
-```{r}
-scans_col_names <- 
-  df %>% 
-  colnames() %>% 
-  str_match_all("scans.[:alpha:]*.result") %>% 
-  unlist()
-
-scan_na_by_col <- 
-  df %>% 
-  select(all_of(scans_col_names)) %>%
-  num_of_NA_by_column()
-
-scan_col_witch_min_na <- 
-  scan_na_by_col %>% 
-  which.min()
-
-best_scanner_colname <- 
-  scan_na_by_col %>% 
-  names() %>% 
-  get_element(scan_col_witch_min_na)
-
-best_scanner_col <- 
-  df %>% 
-  select(best_scanner_colname)
-
-best_scanner_name <- 
-  best_scanner_colname %>% 
-  str_split("[.]") %>% 
-  unlist() %>% 
-  get_element(2)
-```
-```{r echo=FALSE}
-sprintf("Best scan col: %s", best_scanner_colname)
-sprintf("Best scanner: %s", best_scanner_name)
-```
-
-
-Drop all scans but the best.
-
-```{r}
-col_index_scanners <- 
-  df %>% 
-  colnames() %>% 
-  str_detect("scans") %>%
-  unlist() %>% 
-  which()
-
-df <- 
-  df %>% 
-  select(-all_of(col_index_scanners)) %>% 
-  cbind(best_scanner_col)
 ```
 
 ## Save dataframe
