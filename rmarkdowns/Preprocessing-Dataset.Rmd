@@ -292,6 +292,27 @@ df <-
   remove_col_if(df, is_date_col)
 ```
 
+#### Hashes
+
+There are many hashes cols that don't really provide useful information.
+So remove them.
+
+```{r}
+hashes <- 
+  c("")
+
+df <- 
+  df %>% 
+  select(
+    -vhash,
+    -sha256,
+    -sha1,
+    -scan_id,
+    -ssdeep,
+    -md5
+  )
+```
+
 ### Renaming
 
 The column "...1" is the row number, so "n" will be a better name.
