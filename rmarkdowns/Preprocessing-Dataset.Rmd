@@ -231,7 +231,9 @@ df <-
 Now let's deeply inspect into the dataframe.
 
 ```{r echo=FALSE}
-df %>% paged_table()
+df %>% 
+  select(order(colnames(df))) %>% 
+  paged_table()
 ```
 ### Renaming
 
