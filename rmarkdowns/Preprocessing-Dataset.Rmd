@@ -458,6 +458,14 @@ df <-
   remove_cols_which_name_match("^additional_info.androguard.RiskIndicator.APK.[:alpha:]*$")
 ```
 
+### Sorting columns alphabetically
+
+```{r}
+df <- 
+  df %>% 
+  select(order(colnames(df)))
+```
+
 ## Replacing values
 
 ### Replace "Unknown" and "?" by NA
