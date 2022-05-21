@@ -618,7 +618,7 @@ paged_table(df)
 
 After all preprocessing let's save it into CSV.
 
-```{r eval=FALSE}
+```{r}
 write.csv(df, path_export)
 ```
 
