@@ -582,7 +582,13 @@ df %>%
   paged_table()
 ```
 
-#### New total permissions column
+## New colums
+
+There are columns that must be only one, others provide more information by operating two columns, summarises information.
+
+### New total permissions column
+
+Create a new column that sums all permissions of permissions columns.
 
 ```{r}
 pattern <- "additional_info.androguard.RiskIndicator.PERM"
@@ -597,6 +603,41 @@ df_permissions <-
   mutate(., total_PERMs = rowSums(.))
 
 df <- cbind(df_without_permissions, df_permissions)
+```
+
+### Merge both MP3 columns into one
+
+There are two mp3 extension columns, one for .MP3 and the other for .mp3, both are mp3 files.
+The others columns has the name of the extension in upper case, so let's sum both into the MP3 column.
+
+```{r}
+mp3_cols_logical <- 
+  df %>% 
+  colnames() %>% 
+  tolower() %>% 
+  str_detect("mp3")
+mp3_upper_colname <- 
+  colnames(df)[which(mp3_cols_logical)] %>% 
+  str_match("^.*MP3$") %>% 
+  unlist() %>% 
+  na.omit()
+```
+```{r}
+sprintf("MP3 colname: %s", mp3_upper_colname)
+```
+
+Sum them into `r mp3_upper_colname`
+
+```{r}
+mp3_col <- 
+  df %>% 
+  select(which(mp3_cols_logical)) %>% 
+  rowSums(na.rm = TRUE)
+
+df <- 
+  df %>% 
+  select(-which(mp3_cols_logical)) %>% 
+  mutate(additional_info.compressedview.file_types.MP3 = mp3_col)
 ```
 
 ### View results
