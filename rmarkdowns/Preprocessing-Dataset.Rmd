@@ -230,9 +230,12 @@ df <-
 
 Now let's deeply inspect into the dataframe.
 
+### View dataframe
+
+View dataframe.
+
 ```{r echo=FALSE}
-df %>% 
-  paged_table()
+paged_table(df)
 ```
 ### Renaming
 
@@ -358,7 +361,7 @@ best_scanner_colname <-
 
 best_scanner_col <- 
   df %>% 
-  select(best_scanner_colname)
+  select(all_of(best_scanner_colname))
 
 best_scanner_name <- 
   best_scanner_colname %>% 
@@ -449,7 +452,9 @@ df <-
   remove_cols_which_name_match("^additional_info.androguard.RiskIndicator.APK.[:alpha:]*$")
 ```
 
-### Sorting columns
+### View results
+
+Define a function for sort columns.
 
 ```{r}
 sort_cols <- 
@@ -472,9 +477,17 @@ sort_cols <-
   }
 ```
 
+Sort columns.
+
 ```{r}
 df <- 
   sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
 ```
 
 ## Replacing values
@@ -583,6 +596,21 @@ df_permissions <-
   mutate(., total_PERMs = rowSums(.))
 
 df <- cbind(df_without_permissions, df_permissions)
+```
+
+### View results
+
+Sort columns.
+
+```{r}
+df <- 
+  sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
 ```
 
 ## Save dataframe
