@@ -583,9 +583,9 @@ df %>%
   paged_table()
 ```
 
-## New colums
+## New & modifiead colums
 
-There are columns that must be only one, others provide more information by operating two columns, summarises information.
+There are columns that must be only one, others provide more information by operating two columns, or summarises information.
 
 ### New total permissions column
 
@@ -656,6 +656,34 @@ df <-
          -additional_info.exiftool.ZipCompressedSize) %>% 
   mutate(additional_info.exiftool.ZipIncreasedUncompressedSize = increased_size_after_unzip)
 ```
+
+### Suspicious heuristic as logical
+
+The column additional_info.trendmicro.housecall.heuristic has a suspicious flag for some rows, the others are NA. 
+
+1. So will be better to make this column logical: 
+  - NA -> FALSE
+  - Suspicious -> True
+  
+2. Also rename it to make it more understandable: 
+  - additional_info.trendmicro.housecall.heuristic -> additional_info.suspicious
+
+```{r}
+suspicious <- 
+  df$additional_info.trendmicro.housecall.heuristic %>% 
+  is.na() %>% 
+  not()
+
+df <- 
+  df %>% 
+  select(-additional_info.trendmicro.housecall.heuristic) %>% 
+  mutate(additional_info.suspicious = suspicious)
+```
+
+### Decompose columns
+
+The columns additional_info.f.prot.unpacker & additional_info.trid has composed values.
+
 
 ### View results
 
