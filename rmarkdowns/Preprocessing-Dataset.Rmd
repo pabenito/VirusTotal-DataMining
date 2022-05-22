@@ -680,6 +680,35 @@ df <-
   mutate(additional_info.suspicious = suspicious)
 ```
 
+### Decompose unpacker
+
+he column additional_info.f.prot.unpacker has two possible values: "appended" and "UTF-8", and when both happen they are combined into "appended, UTF-8". So will be better to split this column into one logical for each of them.
+
+Compute columns.
+
+```{r}
+unpacker_appended <- 
+  df$additional_info.f.prot.unpacker %>% 
+  sapply(function(str) str_detect(str, "appended")) %>% 
+  replace_na(FALSE)
+
+unpacker_utf8 <- 
+  df$additional_info.f.prot.unpacker %>% 
+  sapply(function(str) str_detect(str, "UTF-8")) %>% 
+  replace_na(FALSE)
+```
+Add them to dataframe.
+
+```{r}
+df <- 
+  df %>% 
+  select(-additional_info.f.prot.unpacker) %>%
+  mutate(additional_info.f.prot.unpacker.appended = unpacker_appended,
+         additional_info.f.prot.unpacker.UTF8 = unpacker_utf8)
+```
+
+
+
 ### Decompose columns
 
 The columns additional_info.f.prot.unpacker & additional_info.trid has composed values.
