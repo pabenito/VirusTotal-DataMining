@@ -707,12 +707,159 @@ df <-
          additional_info.f.prot.unpacker.UTF8 = unpacker_utf8)
 ```
 
+### Decompose trid
+
+The column additional_info.trid has percentages of archives.
+
+```{r}
+df$additional_info.trid[1]
+```
+
+Will be better to decompose this column into a column with the percentage for each value.
+
+#### Extract values and percentages
+
+```{r}
+trid_split_lines <- 
+  df$additional_info.trid %>% 
+  sapply(function(str) str_split(str, "\n"))
+trid_split_lines[[3]]
+```
 
 
-### Decompose columns
+```{r}
+trid_split_value_percentage <- 
+  trid_split_lines %>%
+  sapply(function(row) 
+    sapply(row, function(str) 
+      str_split(str, " \\(|%\\)")))
+trid_split_value_percentage[[1]][[3]]
+```
 
-The columns additional_info.f.prot.unpacker & additional_info.trid has composed values.
+```{r}
+trid_values <- 
+  trid_split_value_percentage %>% 
+  sapply(function(row) 
+    sapply(row, function(value_percentage) 
+      get_element(value_percentage, 1)))
+trid_values[[1]]
+```
 
+```{r}
+trid_percentage <- 
+  trid_split_value_percentage %>% 
+  sapply(function(row) 
+    sapply(row, function(value_percentage) 
+      as.double(get_element(value_percentage, 
+        length(value_percentage) - 1))))
+trid_percentage[[1]]
+```
+
+Define a function to convert the name to a proper trid colname.
+
+```{r}
+trid_to_colname <- 
+  function(name)
+    name %>% 
+      str_to_title() %>% 
+      str_replace_all(" ", "") %>% 
+      sapply(function(name) paste("additional_info.trid", name, sep = "."))
+```
+
+Define function for rename the percentages.
+
+```{r}
+rename_as_value <- 
+  function(v){
+    values_names <- 
+      names(v) %>% 
+      sapply(function(name) str_split(name, " \\(")) %>% 
+      sapply(function(name_split) get_element(name_split, 1)) %>% 
+      sapply(trid_to_colname)
+    names(v) <- values_names
+    return(v)
+  }
+trid_percentage[[1]] %>% 
+  rename_as_value()
+```
+
+Rename the percentages.
+
+```{r}
+trid_percentage_names_as_value <- 
+  trid_percentage %>% 
+  sapply(rename_as_value)
+trid_percentage_names_as_value[[1]]
+```
+
+#### Create columns
+
+Get columns names.
+
+```{r}
+trid_values_colnames <- 
+  trid_values %>% 
+  unlist() %>% 
+  unique() %>% 
+  sapply(trid_to_colname)
+trid_values_colnames
+```
+
+Create an empty tibble with colnames set.
+
+```{r warning=FALSE}
+df_trid <- 
+  matrix(nrow = nrow(df), 
+         ncol = length(trid_values_colnames)) %>% 
+  as_tibble(.name_repair = ~ trid_values_colnames) %>% 
+  mutate_each(as.double)
+```
+
+Colnames.
+
+```{r}
+df_trid %>% 
+  colnames()
+```
+
+Types.
+
+```{r}
+df_trid %>% 
+  sapply(is.double) %>% 
+  sum() == ncol(df_trid)
+```
+Insert values.
+
+```{r}
+for(row_index in 1:nrow(df)){
+  row <- trid_percentage_names_as_value[[row_index]]
+  for(percentage_index in 1:length(row)){
+    percentage <- row[percentage_index]
+    colname <- names(percentage)
+    df_trid[row_index, colname] <- percentage
+  }
+}
+```
+
+Replace NA for 0.
+
+```{r}
+df_trid <- 
+  df_trid %>% 
+  replace(is.na(.), 0)
+```
+
+#### Merge dataframes
+
+Finally merge df and df_trid into one.
+
+```{r}
+df <- 
+  df %>% 
+  select(-additional_info.trid) %>% 
+  cbind(df_trid)
+```
 
 ### View results
 
