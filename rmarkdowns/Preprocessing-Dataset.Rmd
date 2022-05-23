@@ -238,6 +238,7 @@ View dataframe.
 ```{r echo=FALSE}
 paged_table(df)
 ```
+
 ### Renaming
 
 The column "...1" is the row number, so "n" will be a better name.
@@ -530,10 +531,9 @@ df <-
 
 ### Replace NA for 0
 
-#### Permissions colums
+#### Define functions
 
-The permissions columns (PERM) seems that there are NAs where there should be 0s. 
-So it would be better to replace them.
+Define functions for replace NAs.
 
 ```{r}
 replace_na_which_colname_match <- 
@@ -571,16 +571,42 @@ replace_na_when <-
   }
 ```
 
-```{r}
-pattern <- "additional_info.androguard.RiskIndicator.PERM"
+#### Indiviual columns
 
+The columns AndroidApplication and APK.SHARED.LIBRARIES shoud have 0s insteas of NAs.
+
+```{r}
 df <- 
   df %>% 
-  replace_na_which_colname_match(pattern, 0)
+  replace_na_which_colname_match("AndroidApplication", 0) %>% 
+  replace_na_which_colname_match("APK.SHARED.LIBRARIES", 0) 
+```
 
-df %>% 
-  select(., str_which(colnames(.), pattern)) %>% 
-  paged_table()
+#### Groups of colums
+
+The permissions (PERM) and the file types (file_types) groups of columns, seems that there are NAs where there should be 0s. 
+So it would be better to replace them.
+
+```{r}
+df <- 
+  df %>% 
+  replace_na_which_colname_match("PERM", 0) %>% 
+  replace_na_which_colname_match("file_types", 0)
+```
+
+### View results
+
+Sort columns.
+
+```{r}
+df <- 
+  sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
 ```
 
 ## New & modifiead colums
