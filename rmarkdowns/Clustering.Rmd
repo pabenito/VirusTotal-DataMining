@@ -31,7 +31,7 @@ library(readr)
 
 ## Load dataset
 
-```{r}
+```{r message=FALSE}
 virusTotal <- read_csv("../virusTotal/data/virusTotal.csv")
 ```
 
@@ -169,21 +169,9 @@ replace_NA_by_predicted <-
   }
 ```
 
-```{r}
-df <- 
-  replace_NA_by_predicted(df)
-```
-
-
-### Scale
-
-In order to do a fair comparison between variables at clustering, scale them.
-
 ```{r warning=FALSE}
 df <- 
-  df %>% 
-  scale() %>% 
-  as.data.frame()
+  replace_NA_by_predicted(df)
 ```
 
 ### View result
@@ -211,15 +199,106 @@ As can be seen 3 clusters and 7 clusters seem to be optimal number of clusters.
 
 ```{r}
 cluster_k <- function(df, k){
-    kmeans(df, centers = k, nstart = 25)
+  df_scale <- 
+    df %>% 
+    scale() %>% 
+    as.data.frame()
+  l <- list()
+  l$kmeans <- 
+    kmeans(df_scale, centers = k, nstart = 25)
+  l$plot <-
+    l$kmeans %>% 
+    fviz_cluster(geom = "point", data = df_scale) + 
+    ggtitle(paste("k", k, sep="="))
+  l$table <- tibble(row = 1:nrow(df), cluster = l$kmeans$cluster, df)
+  l$cluster_size <- 
+    l$table %>% 
+    group_by(cluster) %>% 
+    summarise(size=n())
+  return(l)
 }
 ```
 
+```{r}
+show_cluster_k <- 
+  function(cluster_k){
+    cluster_k$plot
+    cluster_k$table %>% 
+      paged_table()
+    cluster_k$cluster_size %>% 
+      paged_table()
+  }
+```
+
+
 #### K-3
 
+Apply kmeans with 3 clusters.
+
 ```{r}
-cluster_k(df, 3)
+cluster_k3 <- 
+  cluster_k(df, 3)
 ```
+
+Show results
+
+```{r}
+cluster_k3$plot
+cluster_k3$table %>% 
+  paged_table()
+cluster_k3$cluster_size %>% 
+  paged_table()
+```
+
+
+#### K-7
+
+Apply kmeans with 7 clusters.
+
+```{r}
+cluster_k7 <- 
+  cluster_k(df, 7)
+```
+
+Show results
+
+```{r}
+cluster_k7$plot
+cluster_k7$table %>% 
+  paged_table()
+cluster_k7$cluster_size %>% 
+  paged_table()
+```
+
+### Dendogram
+
+Calculate distances.
+
+```{r}
+distances <- 
+  df %>% 
+  scale() %>% 
+  get_dist(method="euclidean")
+```
+
+Generate dendogram.
+
+```{r}
+dendogram <- 
+  distances %>% 
+  hclust(method="ward.D")
+```
+
+Plot dendogram.
+
+```{r}
+dendogram %>% 
+  plot(main="Dendogram")
+```
+
+
+
+
 
 
 
