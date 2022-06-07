@@ -32,8 +32,199 @@ library(readr)
 ## Load dataset
 
 ```{r}
-virusTotal <- read_csv("../VirusTotal/data/virusTotal.csv")
+virusTotal <- read_csv("../virusTotal/data/virusTotal.csv")
 ```
+
+## Preprocessing
+
+### View dataset
+
+```{r}
+virusTotal %>% paged_table()
+```
+
+### Remove row number columns
+
+As can be seen, at read the col ...1 is added, but the column n already has this information.
+
+Both of them are not interesting columns for clustering, so remove them.
+
+```{r}
+df <- 
+  virusTotal %>% 
+  select(-...1, -n)
+```
+
+### Select numeric columns
+
+Only numeric columns are suitable for clustering, so just remove them.
+
+```{r}
+df <- 
+  df %>% 
+  select_if(is.numeric)
+```
+
+### Rows with NA
+
+```{r}
+rows_with_na <- 
+  function(df){
+      df %>% 
+      is.na() %>% 
+      rowSums() %>% 
+      sapply(function(x) x > 0) %>% 
+      which()
+  }
+```
+
+```{r}
+nrows_with_na <- 
+  df %>% 
+  rows_with_na() %>% 
+  length()
+
+nrows_with_na / nrow(df)
+```
+
+Most of the rows of the dataframe has NA so can't be deleted. If rows with NA were deleted most of the information will be loss.
+
+### Replace NA
+
+Clustering do not work with NAs because distance measure is needed. So just replace NA for predicted value using lineal model.
+
+```{r}
+remove_0 <- 
+  function(x) x[x!=0]
+```
+
+```{r}
+num_of_NA_by_column <- 
+  function(df){
+    df %>% is.na() %>% colSums()
+  }
+```
+
+```{r}
+names_of_colums_with_NA <- 
+  function(df)
+    df %>% 
+      num_of_NA_by_column() %>% 
+      remove_0 %>% 
+      names()
+```
+
+```{r}
+lm_from_all_columns <- 
+  function(df, column){
+    target_column_name <- 
+      colnames(df)[column]
+    col <- df[,column]
+    df <- 
+      df %>% 
+      select(., -all_of(names_of_colums_with_NA(.))) %>% 
+      cbind(col)
+    formula_lm <- 
+      paste(target_column_name, ".", sep = " ~ ") %>% 
+      as.formula()
+    lm(formula_lm, data = df, na.action = na.omit)
+  }
+```
+
+```{r}
+replace_NA_by_predicted_col <- 
+  function(df, col_index){
+    col <- 
+      df[, col_index] %>% 
+      unlist()
+    has_na <- 
+      col %>% 
+      anyNA()
+    if(has_na){
+      lm_col <- 
+        lm_from_all_columns(df, col_index)
+      col_predicted <- 
+        predict.lm(lm_col, df) %>% 
+        as.double()
+      na_col <- 
+        col %>% 
+        sapply(is.na) %>% 
+        as.vector()
+      col <- 
+        if_else(na_col, col_predicted, col)
+    }
+    col <- 
+      as.vector(col)
+    return(col)
+  }
+```
+
+```{r}
+replace_NA_by_predicted <- 
+  function(df){
+    for(index in 1:ncol(df)){
+      df[,index] <- replace_NA_by_predicted_col(df, index)
+    }
+    return(df)
+  }
+```
+
+```{r}
+df <- 
+  replace_NA_by_predicted(df)
+```
+
+
+### Scale
+
+In order to do a fair comparison between variables at clustering, scale them.
+
+```{r warning=FALSE}
+df <- 
+  df %>% 
+  scale() %>% 
+  as.data.frame()
+```
+
+### View result
+
+```{r}
+df %>% 
+  paged_table()
+```
+
+## Clustering
+
+### K-Means
+
+#### Optimal number of clusters
+
+Plot a graphic about the optimal number of clusters. 
+
+```{r}
+fviz_nbclust(df, kmeans, method = "wss", k.max = 15)
+```
+
+As can be seen 3 clusters and 7 clusters seem to be optimal number of clusters.
+
+#### Define a function
+
+```{r}
+cluster_k <- function(df, k){
+    kmeans(df, centers = k, nstart = 25)
+}
+```
+
+#### K-3
+
+```{r}
+cluster_k(df, 3)
+```
+
+
+
+
+
 
 
 
