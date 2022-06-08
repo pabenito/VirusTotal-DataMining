@@ -32,12 +32,33 @@ library(knitr)
 library(scales)
 ```
 
-## Load dataset
+## Configuration
 
-```{r message=FALSE}
-virusTotal <- read_csv("../virusTotal/data/virusTotal.csv")
+### Seed
+
+Set seed.
+
+```{r}
+set.seed(0)
 ```
 
+### Paths
+
+Set paths.
+
+```{r}
+path_import <- "../virusTotal/data/preprocessed.csv"
+path_export <- "../virusTotal/data/clustering.csv"
+```
+
+
+## Load dataset
+
+Set path.
+
+```{r message=FALSE}
+virusTotal <- read_csv(path_import)
+```
 ## Preprocessing
 
 ### View dataset
@@ -508,6 +529,14 @@ Signs of dangerous virus:
 - Has harmless votes.
 - Request many permissions.
 - Has many unique sources.
+
+## Save dataframe
+
+Add the clustering information to the data frame.
+
+```{r}
+write.csv(df_clustering_info_added, path_export)
+```
 
 
 
