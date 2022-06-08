@@ -535,7 +535,26 @@ Signs of dangerous virus:
 Add the clustering information to the data frame.
 
 ```{r}
-write.csv(df_clustering_info_added, path_export)
+cluster_info_cols_index <- 
+  df_clustering_info_added %>% 
+  colnames() %>% 
+  str_detect("^analysis_info") %>% 
+  which()
+
+cluster_info_cols <- 
+  df_clustering_info_added %>% 
+  select(all_of(cluster_info_cols_index))
+```
+
+```{r}
+virusTotal_cluster <- 
+  virusTotal %>% 
+  select(-...1) %>% 
+  cbind(cluster_info_cols)
+```
+
+```{r}
+write.csv(virusTotal_cluster, path_export)
 ```
 
 
