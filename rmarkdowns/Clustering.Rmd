@@ -27,6 +27,9 @@ library(gridExtra)
 library(data.table)
 library(gcookbook)
 library(readr)
+library(stringr)
+library(knitr)
+library(scales)
 ```
 
 ## Load dataset
@@ -54,6 +57,15 @@ df <-
   virusTotal %>% 
   select(-...1, -n)
 ```
+
+### Cast logical columns as numeric
+
+```{r}
+df <- 
+  df %>% 
+  mutate_if(is.logical, as.numeric)
+```
+
 
 ### Select numeric columns
 
@@ -190,10 +202,12 @@ df %>%
 Plot a graphic about the optimal number of clusters. 
 
 ```{r}
-fviz_nbclust(df, kmeans, method = "wss", k.max = 15)
+df %>% 
+  scale() %>% 
+  fviz_nbclust(kmeans, method = "wss", k.max = 15)
 ```
 
-As can be seen 3 clusters and 7 clusters seem to be optimal number of clusters.
+As can be seen 3, 7 and 10 clusters seem to be optimal number of clusters.
 
 #### Define a function
 
@@ -219,18 +233,6 @@ cluster_k <- function(df, k){
 }
 ```
 
-```{r}
-show_cluster_k <- 
-  function(cluster_k){
-    cluster_k$plot
-    cluster_k$table %>% 
-      paged_table()
-    cluster_k$cluster_size %>% 
-      paged_table()
-  }
-```
-
-
 #### K-3
 
 Apply kmeans with 3 clusters.
@@ -250,6 +252,7 @@ cluster_k3$cluster_size %>%
   paged_table()
 ```
 
+As can be seen in the table of the size of the clusters there are two main groups, but the other has only two virus in the cluster 2.
 
 #### K-7
 
@@ -268,6 +271,115 @@ cluster_k7$table %>%
   paged_table()
 cluster_k7$cluster_size %>% 
   paged_table()
+```
+
+Again in k-7 clusters there are four main groups but the others has only 1 or 2 viruses.
+
+That is so curious.
+
+#### K-10
+
+Apply kmeans with 10 clusters.
+
+```{r}
+cluster_k10 <- 
+  cluster_k(df, 10)
+```
+
+Show results
+
+```{r}
+cluster_k10$plot
+cluster_k10$table %>% 
+  paged_table()
+cluster_k10$cluster_size %>% 
+  paged_table()
+```
+
+Again in k-10 clusters there are many small groups that are very different from the rest in terms of number of viruses clasified in.
+
+#### Conclusion
+
+This is so strange clustering distribution, so would be interesting to inspect why it is happening.
+
+#### Add cluster information to the dataframe.
+
+```{r}
+df_clustering_info_added <- 
+  df %>% 
+  mutate(
+    analysis_info.clustering.cluster.k3 = 
+      cluster_k3$kmeans$cluster) %>% 
+  mutate(
+    analysis_info.clustering.cluster.k7 = 
+      cluster_k7$kmeans$cluster) %>% 
+  mutate(
+    analysis_info.clustering.cluster.k10 = 
+      cluster_k10$kmeans$cluster)
+```
+
+
+### Inspect small groups 
+
+Define a function.
+
+```{r}
+small_clusters <- 
+  function(table_cluster_size, percent){
+    max <- 
+      max(table_cluster_size$size)
+    min <- 
+      min(table_cluster_size$size)
+    threshold <- 
+      min + (max - min) * percent
+    small_clusters <- 
+      table_cluster_size %>% 
+      filter(size <= threshold) %>% 
+      select(cluster) %>% 
+      unlist()
+    return(small_clusters)
+  }
+```
+
+```{r}
+belongs_to_small_cluster <- 
+  function(cluster, small_clusters)
+    cluster %in% small_clusters
+```
+
+#### Small clusters of k10
+
+Compute small clusters of k10
+
+```{r}
+small_clusters_k10 <- 
+  cluster_k10$cluster_size %>% 
+  small_clusters(0.2)
+```
+
+Show rows that belong to small clusters.
+
+```{r}
+belongs_to_small_cluster_k10 <- 
+  belongs_to_small_cluster(
+    cluster_k10$table$cluster,
+    small_clusters_k10
+  )
+
+small_groups_df <- 
+  df %>% 
+  filter(belongs_to_small_cluster_k10)
+small_groups_df %>% 
+  paged_table()
+```
+#### Add this information to the dataframe.
+
+```{r}
+df_clustering_info_added <- 
+  df_clustering_info_added %>% 
+  mutate(
+    analysis_info.clustering.belongs_to_small_cluster.k10 =
+      belongs_to_small_cluster_k10)
 ```
 
 ### Dendogram
@@ -295,6 +407,107 @@ Plot dendogram.
 dendogram %>% 
   plot(main="Dendogram")
 ```
+### Analyse clusters
+
+#### Analyse variables by clusters
+
+The idea is view how affect belonging to a cluster to the main variables distribution.
+
+The main variables are those whose names do not begin with "something.". So just keep columns whose name do not have '.'.
+
+```{r}
+cols_to_select <- 
+  df_clustering_info_added %>% 
+  colnames() %>% 
+  str_detect("\\.", negate = TRUE)
+```
+
+```{r}
+means_by_cluster <- 
+  df_clustering_info_added %>% 
+  group_by(analysis_info.clustering.cluster.k10) %>% 
+  select_if(cols_to_select) %>% 
+  summarise_all(mean) %>% 
+  round(2) %>% 
+  rename_with(function(name) paste("mean", name, sep = "_")) %>% 
+  rename(cluster = mean_analysis_info.clustering.cluster.k10) %>% 
+  arrange(desc(mean_size))
+means_by_cluster %>% 
+  paged_table()
+```
+
+#### Analyse variables by cluster size
+
+The idea is view how affect the cluster size to the main variables distribution.
+
+```{r}
+means_by_cluster_size <- 
+  df_clustering_info_added %>% 
+  group_by(analysis_info.clustering.belongs_to_small_cluster.k10) %>% 
+  select_if(cols_to_select) %>% 
+  summarise_all(mean) %>% 
+  round(2) %>% 
+  rename_with(function(name) paste("mean", name, sep = "_")) %>% 
+  rename(small_cluster = 
+           mean_analysis_info.clustering.belongs_to_small_cluster.k10) %>% 
+  mutate(small_cluster = as.logical(small_cluster)) %>% 
+  arrange(desc(mean_size))
+means_by_cluster_size %>% 
+  paged_table()
+```
+
+The result is amazing! The risk of the virus increase so much by belonging to a small group.
+
+Let's express this in percentaje.
+
+```{r}
+increment_by_small_cluster <- 
+  (means_by_cluster_size[1,] / 
+  means_by_cluster_size[2,]) %>% 
+  select(-small_cluster)
+increment_by_small_cluster %>% 
+  paged_table()
+```
+
+```{r}
+increment_by_small_cluster_percentage <- 
+  (increment_by_small_cluster - 1) %>% 
+  select_if(function(x) !is.infinite(x)) %>% 
+  unlist() %>% 
+  percent()
+increment_by_small_cluster_percentage
+```
+
+## Summarize results.
+
+Looking at the results of the dendogram and knowing the distribution of clusters, seem that most of the viruses follows common patterns, but there are some others that breaks radically with these patterns.
+
+Virus that don't follow patterns tend to:
+
+- (size) Infect x8 more computers
+- (community_reputation) Increase bad reputation x438
+- (harmless_votes) Are the only ones with harmless votes.
+- (malicious_votes) Increase the chance to have malicious votes x67
+- (positives) Decrease positives by 12%
+- (times_submitted) Decrease times submitted by 54%
+- (total) Increase total by 3,75%
+- (unique_source) Increase the unique sources x16
+
+It is interesting to see how the most dangerous viruses:
+
+- Are the only ones who have harmless votes.
+- Request more permissions.
+
+## Conclusion
+
+Concluding, virus that don't follow the commons patterns tends to be much more dangerous than the others.
+
+Signs of dangerous virus:
+
+- Has high community reputation.
+- Has harmless votes.
+- Request many permissions.
+- Has many unique sources.
 
 
 
