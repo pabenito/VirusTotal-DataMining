@@ -1,0 +1,319 @@
+---
+title: "Regression"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Regression
+
+## Libraries
+
+Library for R Markdown.
+
+```{r}
+library(rmarkdown)
+```
+
+Library for data frames processing.
+
+```{r message=FALSE}
+library(dplyr)
+```
+
+Library for read dataset.
+
+```{r}
+library(readr)
+```
+
+Library for summary statistics.
+
+```{r}
+library(skimr)
+```
+
+Library for plot.
+
+```{r}
+library(ggplot2)
+```
+
+Library for regression.
+
+```{r}
+library(performance)
+```
+
+Library for manage strings.
+
+```{r}
+library(stringr)
+```
+
+## Load dataset
+
+Set paths.
+
+```{r}
+path <- "../virusTotal/data/clustering.csv"
+```
+
+```{r message=FALSE}
+virusTotal <- read_csv(path)
+```
+
+## Preprocessing
+
+### View dataset
+
+```{r}
+virusTotal %>% paged_table()
+```
+
+### Remove row number columns
+
+As can be seen, at read the col ...1 is added, but the column n already has this information.
+
+```{r}
+df <- 
+  virusTotal %>% 
+  select(-...1, -n)
+```
+
+### Cast logical columns as numeric
+
+Logical columns can be casted as numeric, TRUE as 1, FALSE as 0.
+
+But 0s are not suitable for regression, so let's replace FALSE for -1 instead.
+
+```{r}
+replace_value <- 
+  function(v, value, replacement){
+    v[v==value] <- replacement
+    return(v)
+  }
+```
+
+```{r}
+df <- 
+  df %>% 
+  mutate_if(
+    is.logical, 
+    function(logical) replace_value(as.numeric(logical), 0, -1))
+```
+
+### Select numeric columns
+
+Only numeric columns are suitable for clustering, so just remove them.
+
+```{r}
+df <- 
+  df %>% 
+  select_if(is.numeric)
+```
+
+### Rows with NA
+
+```{r}
+rows_with_na <- 
+  function(df){
+      df %>% 
+      is.na() %>% 
+      rowSums() %>% 
+      sapply(function(x) x > 0) %>% 
+      which()
+  }
+```
+
+```{r}
+nrows_with_na <- 
+  df %>% 
+  rows_with_na() %>% 
+  length()
+
+nrows_with_na / nrow(df)
+```
+
+Most of the rows of the dataframe has NA so can't be deleted. If rows with NA were deleted most of the information will be loss.
+
+### Replace NA
+
+Clustering do not work with NAs because distance measure is needed. So just replace NA for predicted value using lineal model.
+
+```{r}
+remove_0 <- 
+  function(x) x[x!=0]
+```
+
+```{r}
+num_of_NA_by_column <- 
+  function(df){
+    df %>% is.na() %>% colSums()
+  }
+```
+
+```{r}
+names_of_colums_with_NA <- 
+  function(df)
+    df %>% 
+      num_of_NA_by_column() %>% 
+      remove_0 %>% 
+      names()
+```
+
+```{r}
+lm_from_all_columns <- 
+  function(df, column){
+    target_column_name <- 
+      colnames(df)[column]
+    col <- df[,column]
+    df <- 
+      df %>% 
+      select(., -all_of(names_of_colums_with_NA(.))) %>% 
+      cbind(col)
+    formula_lm <- 
+      paste(target_column_name, ".", sep = " ~ ") %>% 
+      as.formula()
+    lm(formula_lm, data = df, na.action = na.omit)
+  }
+```
+
+```{r}
+replace_NA_by_predicted_col <- 
+  function(df, col_index){
+    col <- 
+      df[, col_index] %>% 
+      unlist()
+    has_na <- 
+      col %>% 
+      anyNA()
+    if(has_na){
+      lm_col <- 
+        lm_from_all_columns(df, col_index)
+      col_predicted <- 
+        predict.lm(lm_col, df) %>% 
+        as.double()
+      na_col <- 
+        col %>% 
+        sapply(is.na) %>% 
+        as.vector()
+      col <- 
+        if_else(na_col, col_predicted, col)
+    }
+    col <- 
+      as.vector(col)
+    return(col)
+  }
+```
+
+```{r}
+replace_NA_by_predicted <- 
+  function(df){
+    for(index in 1:ncol(df)){
+      df[,index] <- replace_NA_by_predicted_col(df, index)
+    }
+    return(df)
+  }
+```
+
+```{r warning=FALSE}
+df <- 
+  replace_NA_by_predicted(df)
+```
+
+### View result
+
+```{r}
+df %>% 
+  paged_table()
+```
+
+## Regression
+
+The idea is to get the best models to predict the most important variables of the dataset.
+
+The most important variables are those whose names do not begin with "something.". So just keep columns whose name do not have '.', excludint de row number column "n".
+
+```{r}
+important_columns_logical <- 
+  df %>% 
+  colnames() %>% 
+  str_detect("n|\\.", negate = TRUE)
+```
+
+```{r}
+important_columns_index <- 
+  important_columns_logical %>% 
+  which()
+```
+
+```{r}
+important_columns_names <- 
+  colnames(df)[important_columns_index]
+important_columns_names
+```
+### Define functions
+
+```{r}
+formula_from_names <- 
+  function(target, col){
+    formulaStr <- paste0(target, "~", col)
+    formula <- as.formula(formulaStr)
+  }
+```
+
+```{r}
+lm_from_names <- 
+  function(df, target, col)
+    lm(formula_from_names(target, col), data = df)
+```
+
+```{r}
+all_one_variable_models <- function(df, target){
+  names <- colnames(df)
+  names <- names[names!=target]
+  lapply(names, function(col) lm_from_names(df, target, col))
+}
+```
+
+```{r}
+sort_models <- function(models){
+  models_r2 <- 
+    models %>% 
+    lapply(r2) %>% 
+    sapply(function(x) x[[2]])
+  models_df <- 
+    tibble(model = models, r2 = models_r2) %>% 
+    arrange(desc(r2)) %>% 
+    pull("model")
+}
+```
+
+```{r}
+rank_one_variable_models <- 
+  function(df, target){
+    rank <- 
+      df %>% 
+      all_one_variable_models(target) %>% 
+      sort_models
+    return(rank)
+  }
+```
+
+```{r eval=FALSE}
+rank_one_variable_models(df, "size")
+```
+
+
+
+
+
+

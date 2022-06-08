@@ -790,7 +790,10 @@ trid_to_colname <-
   function(name)
     name %>% 
       str_to_title() %>% 
-      str_replace_all(" ", "") %>% 
+      str_match_all("[:alpha:]*") %>% 
+      unlist() %>% 
+      paste0(collapse = " ") %>%
+      str_remove_all(" ") %>% 
       sapply(function(name) paste("additional_info.trid", name, sep = "."))
 ```
 
@@ -825,10 +828,15 @@ trid_percentage_names_as_value[[1]]
 Get columns names.
 
 ```{r}
-trid_values_colnames <- 
+trid_labels <- 
   trid_values %>% 
   unlist() %>% 
-  unique() %>% 
+  unique()
+trid_labels
+```
+```{r}
+trid_values_colnames <- 
+  trid_labels %>% 
   sapply(trid_to_colname)
 trid_values_colnames
 ```

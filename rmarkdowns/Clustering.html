@@ -1462,7 +1462,6 @@ code span.ot { color: #007020; }
 </div>
 <div id="load-dataset" class="section level2">
 <h2>Load dataset</h2>
-<p>Set path.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>virusTotal <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(path_import)</span></code></pre></div>
 </div>
 <div id="preprocessing" class="section level2">
@@ -1488,6 +1487,7 @@ them.</p>
 </div>
 <div id="cast-logical-columns-as-numeric" class="section level3">
 <h3>Cast logical columns as numeric</h3>
+<p>Cast logical to numeric in order to be able to cluster with them.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">%&gt;%</span> </span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.logical, as.numeric)</span></code></pre></div>

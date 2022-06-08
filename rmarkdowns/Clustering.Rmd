@@ -74,8 +74,6 @@ path_export <- "../virusTotal/data/clustering.csv"
 
 ## Load dataset
 
-Set path.
-
 ```{r message=FALSE}
 virusTotal <- read_csv(path_import)
 ```
@@ -101,12 +99,13 @@ df <-
 
 ### Cast logical columns as numeric
 
+Cast logical to numeric in order to be able to cluster with them.
+
 ```{r}
 df <- 
   df %>% 
   mutate_if(is.logical, as.numeric)
 ```
-
 
 ### Select numeric columns
 
