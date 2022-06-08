@@ -16,20 +16,40 @@ vignette: >
 
 ## Libraries
 
-```{r message=FALSE, warning=FALSE}
+Library for R Markdown.
+
+```{r}
 library(rmarkdown)
-library(kableExtra)
-library(dplyr)
+```
+
+Library for clustering
+
+```{r message=FALSE}
 library(factoextra)
-library(cluster)
-library(ggplot2)
-library(gridExtra)
-library(data.table)
-library(gcookbook)
+```
+
+Library for data frames processing.
+
+```{r message=FALSE}
+library(dplyr)
+```
+
+Library for read dataset.
+
+```{r}
 library(readr)
-library(stringr)
-library(knitr)
+```
+
+Library for data presentation.
+
+```{r message=FALSE}
 library(scales)
+```
+
+Library for manage strings.
+
+```{r}
+library(stringr)
 ```
 
 ## Configuration
