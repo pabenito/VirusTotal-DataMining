@@ -1468,6 +1468,68 @@ has this information.</p>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>...<span class="dv">1</span>)</span></code></pre></div>
 </div>
 </div>
+<div id="from-data-frame-to-graph" class="section level2">
+<h2>From data frame to graph</h2>
+<p>The objective is to generate a graph from existing data frame. But
+how?</p>
+<p>The idea is create relationships between virus which has same values.
+Also give weights to relationships as a function of how likely it is
+that coincidence will occur for that variable.</p>
+<p>Plan:</p>
+<ol style="list-style-type: decimal">
+<li>Find virus with sames values in any variable.</li>
+<li>Compute how likely it is that coincidence.</li>
+<li>Set the Weight of that relationship based on that probability.</li>
+</ol>
+<p>What is needed?</p>
+<ol style="list-style-type: decimal">
+<li>Create a table with the two first columns with the indexes of the
+viruses in the relationship. The rest of columns are the values that has
+in common.</li>
+<li>Compute a list with the frequency of each element for every
+column.</li>
+<li>Add the column Weight to the data frame based in a frecuency
+ponderation of each value in common.</li>
+<li>Create a graph from it.</li>
+</ol>
+<div id="find-matching-values" class="section level3">
+<h3>Find matching values</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pairs <span class="ot">&lt;-</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(n){</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    pairs <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(n<span class="dv">-1</span>)){</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(j <span class="cf">in</span> (i<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>n){</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        pairs[[<span class="fu">length</span>(pairs) <span class="sc">+</span> <span class="dv">1</span>]] <span class="ot">&lt;-</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>          <span class="fu">c</span>(i, j)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(pairs) <span class="ot">&lt;-</span> </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      pairs <span class="sc">%&gt;%</span> </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sapply</span>(<span class="cf">function</span>(v) <span class="fu">paste</span>(<span class="fu">as.character</span>(v), <span class="at">collapse =</span> <span class="st">&quot;-&quot;</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(pairs)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df_ij <span class="ot">&lt;-</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, i, j){</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    df_ij <span class="ot">&lt;-</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      (df[i,] <span class="sc">==</span> df[j,]) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(<span class="fu">as.vector</span>(df[i,]), <span class="cn">NA</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unlist</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(i, j, .)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(df_ij) <span class="ot">&lt;-</span> </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">&quot;v1&quot;</span>, <span class="st">&quot;v2&quot;</span>, <span class="fu">colnames</span>(df))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(df_ij)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_edges <span class="ot">&lt;-</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  df[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ncol</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pairs</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="cf">function</span>(v) <span class="fu">df_ij</span>(df[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,], v[<span class="dv">1</span>], v[<span class="dv">2</span>])) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_edges <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paged_table</span>()</span></code></pre></div>
+<p>Not endded.</p>
+</div>
+</div>
 </div>
 </section>
 

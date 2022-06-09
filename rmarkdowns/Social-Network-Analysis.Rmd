@@ -91,44 +91,52 @@ What is needed?
 
 ### Find matching values
 
-Defaults
-
 ```{r}
-data("mtcars")
-df <- mtcars
-```
-
-```{r}
-df_ij_default <- 
-  rep(NA, times = ncol(df) + 2)
-names(df_ij_default) <- 
-  c("v1", "v2", colnames(df))
-df_edges <- NA
-for(i in 1:nrow(df)){
-  for(j in (i+1):nrow(df)){
-    df_ij <- df_ij_default
-    df_ij[1] <- i
-    df_ij[2] <- j
-    for(col in 1:ncol(df)){
-      i_value <- df[i,col]
-      j_value <- df[j,col]
-      if(!is.na(i_value) && 
-         !is.na(j_value) && 
-         i_value == j_value){
-        df_ij[col+2] <- df[i, col]
-        df_edges <- 
-          rbind(df_edges, df_ij)
+pairs <- 
+  function(n){
+    pairs <- list()
+    for(i in 1:(n-1)){
+      for(j in (i+1):n){
+        pairs[[length(pairs) + 1]] <- 
+          c(i, j)
       }
     }
+    names(pairs) <- 
+      pairs %>% 
+      sapply(function(v) paste(as.character(v), collapse = "-"))
+    return(pairs)
   }
-}
 ```
 
 ```{r}
-df_edges
+df_ij <- 
+  function(df, i, j){
+    df_ij <- 
+      (df[i,] == df[j,]) %>% 
+      ifelse(as.vector(df[i,]), NA) %>% 
+      unlist() %>% 
+      c(i, j, .)
+    names(df_ij) <- 
+      c("v1", "v2", colnames(df))
+    return(df_ij)
+  }
 ```
 
-### Frecuency
+```{r eval=FALSE}
+df_edges <- 
+  df[1:10] %>%
+  ncol() %>% 
+  pairs() %>% 
+  sapply(function(v) df_ij(df[1:2,], v[1], v[2])) %>% 
+  rbind()
+```
+
+```{r eval=FALSE}
+df_edges %>% 
+  paged_table()
+```
+
+Not endded.
 
 
 
