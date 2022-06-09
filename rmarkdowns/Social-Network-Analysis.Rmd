@@ -1,5 +1,5 @@
 ---
-title: "Regression"
+title: "Social Network Analysis"
 author: "Pedro Antonio Benito Rojano"
 date: "`r Sys.Date()`"
 output:
@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Regression
+# Social Network Analysis
 
 ## Libraries
 
@@ -36,7 +36,7 @@ library(readr)
 
 Library for graphs.
 
-```{r}
+```{r message=FALSE}
 library(igraph)
 ```
 
@@ -69,3 +69,75 @@ df <-
   virusTotal %>% 
   select(-...1)
 ```
+
+## From data frame to graph
+
+The objective is to generate a graph from existing data frame. But how? 
+
+The idea is create relationships between virus which has same values. Also give weights to relationships as a function of how likely it is that coincidence will occur for that variable.
+
+Plan:
+
+1. Find virus with sames values in any variable.
+2. Compute how likely it is that coincidence.
+3. Set the Weight of that relationship based on that probability.
+
+What is needed?
+
+1. Create a table with the two first columns with the indexes of the viruses in the relationship. The rest of columns are the values that has in common. 
+2. Compute a list with the frequency of each element for every column.
+3. Add the column Weight to the data frame based in a frecuency ponderation of each value in common.
+4. Create a graph from it.
+
+### Find matching values
+
+Defaults
+
+```{r}
+data("mtcars")
+df <- mtcars
+```
+
+```{r}
+df_ij_default <- 
+  rep(NA, times = ncol(df) + 2)
+names(df_ij_default) <- 
+  c("v1", "v2", colnames(df))
+df_edges <- NA
+for(i in 1:nrow(df)){
+  for(j in (i+1):nrow(df)){
+    df_ij <- df_ij_default
+    df_ij[1] <- i
+    df_ij[2] <- j
+    for(col in 1:ncol(df)){
+      i_value <- df[i,col]
+      j_value <- df[j,col]
+      if(!is.na(i_value) && 
+         !is.na(j_value) && 
+         i_value == j_value){
+        df_ij[col+2] <- df[i, col]
+        df_edges <- 
+          rbind(df_edges, df_ij)
+      }
+    }
+  }
+}
+```
+
+```{r}
+df_edges
+```
+
+### Frecuency
+
+
+
+
+
+
+
+
+
+
+
+
