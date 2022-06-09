@@ -240,6 +240,18 @@ df %>%
 
 The idea is to get the best models to predict the most important variables of the dataset.
 
+How to get the best model?
+
+1. Compute all one variable models for target
+2. Sort them by R2-ajusted
+3. Iteratively add the best predicted variable remaining from the sorted list while R2-ajusted increase. 
+
+This method compute the best model?
+
+No, it's no the best model, but it's a good approach to get a good enough model without much computing.
+
+### Important columns
+
 The most important variables are those whose names do not begin with "something.". So just keep columns whose name do not have '.', excluding row number column "n".
 
 ```{r}

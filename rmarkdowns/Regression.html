@@ -1597,6 +1597,18 @@ So just replace NA for predicted value using lineal model.</p>
 <h2>Regression</h2>
 <p>The idea is to get the best models to predict the most important
 variables of the dataset.</p>
+<p>How to get the best model?</p>
+<ol style="list-style-type: decimal">
+<li>Compute all one variable models for target</li>
+<li>Sort them by R2-ajusted</li>
+<li>Iteratively add the best predicted variable remaining from the
+sorted list while R2-ajusted increase.</li>
+</ol>
+<p>This method compute the best model?</p>
+<p>No, it’s no the best model, but it’s a good approach to get a good
+enough model without much computing.</p>
+<div id="important-columns" class="section level3">
+<h3>Important columns</h3>
 <p>The most important variables are those whose names do not begin with
 “something.”. So just keep columns whose name do not have ‘.’, excluding
 row number column “n”.</p>
@@ -1612,6 +1624,7 @@ row number column “n”.</p>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>important_columns_names</span></code></pre></div>
 <pre><code>## [1] &quot;size&quot;            &quot;harmless_votes&quot;  &quot;malicious_votes&quot; &quot;positives&quot;      
 ## [5] &quot;times_submitted&quot; &quot;total&quot;           &quot;total_PERMs&quot;</code></pre>
+</div>
 <div id="define-functions" class="section level3">
 <h3>Define functions</h3>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>formula_from_names <span class="ot">&lt;-</span> </span>
