@@ -1,8 +1,15 @@
 ---
 title: "Virustotal_aRules"
-author: "Ángel Sergio"
+author: "Ángel Sergio Sánchez Marín"
 date: '2022-05-18'
-output: html_document
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -19,7 +26,6 @@ library(stringr)
 library(tidyverse)
 ```
 
-
 ```{r}
 path_import = "../virusTotal/data/original.csv"
 path_export = "../virusTotal/data/dataDiscretized.csv"
@@ -31,9 +37,15 @@ path_export = "../virusTotal/data/dataDiscretized.csv"
 virus <- read_csv(path_import)
 ```
 
+*In this exercise we are going to observe the access to permissions by files together with the risk they present.*
+
+*As there are a large number of viruses each with different objectives, the association rules generated can be used to predict which permissions a particular virus wants to access along with the probability that it will do so.*
+
+*We have also added the number of positives to see the risk factor of the different permit accesses.*
+
 ### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
-```{r lectura, include=FALSE}
+```{r read}
 
  
 
@@ -66,7 +78,7 @@ virus <-
 
 ### We select the rules.
 
-```{r lectura, include=FALSE}
+```{r select}
 df_rules <- virus %>%
    select(c( positives,
              additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
@@ -88,6 +100,13 @@ df_rules <- virus %>%
              additional_info.androguard.RiskIndicator.PERM.INSTALLER,
              additional_info.androguard.RiskIndicator.PERM.RUNTIME
              ))
+
+colnames(df_rules)<-gsub("additional_info.androguard.RiskIndicator.PERM.","",
+                         colnames(df_rules))
+View(df_rules)
+```
+
+```{r view, include=FALSE}
 View(df_rules)
 ```
 
@@ -95,7 +114,7 @@ View(df_rules)
 
 ### The function does not apply to columns with few values, as they do not provide much information.
 
-```{r lectura, include=FALSE}
+```{r discretize}
 
 labels <- 
   function(n){
@@ -154,18 +173,21 @@ View(df_discretize )
 ```
 
 ```{r}
+View(df_discretize )
+```
+
+```{r}
 write.csv(df_discretize, path_export)
 ```
 
-
-
-
 ### We use the apriori method with standard confidence and support values.
 
-```{r}
+```{r apriori}
 rules <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
 
 ```
+
+### We remove redundant rules.
 
 ```{r}
 redundantes <- is.redundant(rules)
@@ -178,11 +200,11 @@ inspect(head(r_significantes))
 
 ```
 
-
+### Display
 
 ```{r}
 library(arulesViz)
-subrules <- subset(r_significantes, lift>4)
+subrules <- subset(r_significantes, lift>3)
 
 plot(subrules, method="graph", engine="htmlwidget", 
      igraphLayout = "layout_in_circle")

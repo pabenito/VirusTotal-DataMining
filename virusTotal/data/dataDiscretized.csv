@@ -1,4 +1,4 @@
-"","positives","additional_info.androguard.RiskIndicator.PERM.DANGEROUS","additional_info.androguard.RiskIndicator.PERM.NORMAL","additional_info.androguard.RiskIndicator.PERM.PRIVACY","additional_info.androguard.RiskIndicator.PERM.SMS","additional_info.androguard.RiskIndicator.PERM.MONEY"
+"","positives","DANGEROUS","NORMAL","PRIVACY","SMS","MONEY"
 "1","low","low","low","low","low","low"
 "2","low","medium","medium","low","low","low"
 "3","very low","low","high","high","high","high"
