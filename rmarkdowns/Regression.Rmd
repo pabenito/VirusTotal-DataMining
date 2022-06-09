@@ -240,7 +240,7 @@ df %>%
 
 The idea is to get the best models to predict the most important variables of the dataset.
 
-The most important variables are those whose names do not begin with "something.". So just keep columns whose name do not have '.', excludint de row number column "n".
+The most important variables are those whose names do not begin with "something.". So just keep columns whose name do not have '.', excluding row number column "n".
 
 ```{r}
 important_columns_logical <- 
@@ -285,11 +285,16 @@ all_one_variable_models <- function(df, target){
 ```
 
 ```{r}
+get_r2_adjusted <- 
+  function(lm)
+    r2(lm)[[2]]
+```
+
+```{r}
 sort_models <- function(models){
   models_r2 <- 
     models %>% 
-    lapply(r2) %>% 
-    sapply(function(x) x[[2]])
+    sapply(get_r2_adjusted)
   models_df <- 
     tibble(model = models, r2 = models_r2) %>% 
     arrange(desc(r2)) %>% 
@@ -308,9 +313,141 @@ rank_one_variable_models <-
   }
 ```
 
-```{r eval=FALSE}
-rank_one_variable_models(df, "size")
+```{r}
+get_target_name <- 
+  function(lm){
+    lm_terms <- 
+      lm_test %>% 
+      summary() %>% 
+      terms()
+    predicted <- 
+      lm_terms[[2]] %>% 
+      as.character()
+    return(predicted)
+  }
 ```
+
+```{r}
+get_predictors_names <- 
+  function(lm){
+    lm_terms <- 
+      lm %>% 
+      summary() %>% 
+      terms()
+    predictors_str <- 
+      lm_terms[[3]]
+    predictors <- 
+      predictors_str %>% 
+      as.character() %>% 
+      str_remove_all(fixed("+")) %>% 
+      str_split(fixed(" ")) %>% 
+      unlist()
+    predictors <- 
+      predictors[predictors != ""]
+    return(predictors)
+  }
+```
+
+```{r}
+lm_add_variable <- 
+  function(lm, variable_names){
+    target <- 
+      get_target_name(lm)
+    predictors <- 
+      get_predictors_names(lm_test)
+    predictors_str <- 
+      paste(predictors, collapse = " + ")
+    formula_str <- 
+      paste(target, predictors_str, sep = " ~ ")
+    formula <- 
+      formula_str %>% 
+      as.formula()
+    new_lm <- 
+      lm(formula, data = lm$model)
+  }
+```
+
+```{r}
+lm_from_names <- 
+  function(df, target, predictors){
+    predictors_str <- 
+      paste(predictors, collapse = " + ")
+    formula_str <- 
+      paste(target, predictors_str, sep = " ~ ")
+    formula <- 
+      formula_str %>% 
+      as.formula()
+    lm <- 
+      lm(formula, data = df)
+  }
+```
+
+```{r}
+best_model <- 
+  function(df, target){
+    predictors_rank <- 
+      rank_one_variable_models(df, target) %>% 
+      sapply(get_predictors_names)
+    idx <- 1
+    r2_adjusted_prev <- -Inf
+    r2_adjusted_current <- 0
+    lm <- NA
+    while(r2_adjusted_current > r2_adjusted_prev){
+      lm <- 
+        lm_from_names(df, target, predictors_rank[1:idx])
+      r2_adjusted_prev <- 
+        r2_adjusted_current
+      r2_adjusted_current <- 
+        get_r2_adjusted(lm)
+      idx <- idx + 1
+    }
+    return(lm)
+  }
+```
+
+```{r}
+best_models <- 
+  function(df, targets){
+    best_models <- 
+      targets %>% 
+      lapply(function(target) best_model(df, target))
+    return(best_models)
+  }
+```
+
+### Compute best lineal models
+
+```{r}
+best_models_main_variables <- 
+  best_models(df, important_columns_names)
+```
+
+### View results
+
+```{r}
+best_models_summary <- 
+  best_models_main_variables %>% 
+  lapply(summary)
+names(best_models_summary) <- 
+  important_columns_names
+```
+
+```{r}
+best_models_r2 <- 
+  best_models_main_variables %>% 
+  sapply(get_r2_adjusted)
+names(best_models_r2) <- 
+  important_columns_names
+```
+
+```{r}
+best_models_r2 %>% 
+  sort(decreasing = TRUE)
+```
+
+
+
+
 
 
 
