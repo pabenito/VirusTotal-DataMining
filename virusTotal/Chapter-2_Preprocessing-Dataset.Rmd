@@ -1,0 +1,984 @@
+---
+title: "Preprocessing Dataset"
+author: "Pedro Antonio Benito Rojano"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Preprocessing Dataset
+
+## Paths
+
+Set the path of the dataframe file.
+
+```{r}
+path_import = "../virusTotal/data/original.csv"
+path_export = "../virusTotal/data/preprocessed.csv"
+```
+
+## Libraries
+
+Library for read dataset.
+
+```{r}
+library(readr)
+```
+
+Library for data frames processing.
+
+```{r message=FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+Library for R Markdown.
+
+```{r}
+library(rmarkdown)
+library(knitr)
+```
+
+Library for data presentation.
+
+```{r message=FALSE}
+library(scales)
+```
+
+Library for manage strings.
+
+```{r}
+library(stringr)
+```
+
+## Load dataset
+
+Load dataset.
+
+```{r message=FALSE}
+df <- read_csv(path_import)
+```
+
+## Statistics
+
+Dimensions.
+
+```{r}
+dim(df)
+```
+### Types
+
+View witch types are in the dataset.
+
+```{r}
+col_types_all <- 
+  df %>% 
+  sapply(typeof) %>% 
+  unlist()
+
+col_types_table <- 
+  col_types_all %>% 
+  table()
+
+col_types <- 
+  col_types_table %>% 
+  as.vector()
+
+names(col_types) <- names(col_types_table)
+```
+```{r echo=FALSE}
+col_types
+```
+
+As can be seen there are the three expected types: character, double and logical.
+
+### NA
+
+#### Percentaje of NA values
+
+Define function to see the amount of NA values in the dataframe. 
+
+```{r}
+percent_of_NA <- 
+  function(df){
+    num_of_NA <- 
+      df %>% is.na() %>% sum()
+    num_of_values <- 
+      df %>% dim() %>% prod()
+    percent_of_NA <- 
+      (num_of_NA / num_of_values) %>% 
+      percent()
+    return(percent_of_NA)
+  }
+```
+
+```{r}
+percent_of_NA(df)
+```
+
+#### Columns with NA
+
+Define functions to see the NA in columns.
+
+```{r}
+num_of_NA_by_column <- 
+  function(df){
+    df %>% is.na() %>% colSums()
+  }
+```
+
+```{r}
+remove_0 <- 
+  function(x) x[x!=0]
+```
+
+```{r}
+names_of_colums_with_NA <- 
+  function(df)
+    df %>% 
+      num_of_NA_by_column() %>% 
+      remove_0 %>% 
+      names()
+```
+
+```{r}
+percentaje_of_cols_with_NA <-
+  function(df)
+    (length(names_of_colums_with_NA(df)) / ncol(df)) %>% 
+    percent()
+```
+
+Compute the percentaje of cols with NA.
+
+```{r}
+percentaje_of_cols_with_NA(df)
+```
+
+Inspect if there are columns full of NA.
+
+```{r}
+is_full_of_NA <- function(col){
+  num_of_NA <- 
+    col %>% 
+    is.na() %>% 
+    sum()
+  return(num_of_NA == length(col))
+}
+```
+
+```{r}
+cols_full_of_NA <- 
+  df %>% 
+  select_if(is_full_of_NA) %>% 
+  names()
+```
+```{r echo=FALSE}
+cols_full_of_NA
+```
+
+As can be seen there are many columns that are full of NA, so can be deleted.
+
+```{r}
+df <- 
+  select(df, -all_of(cols_full_of_NA))
+```
+
+#### Colums with the same value
+
+Maybe there are columns that has the same value along all the vector, so are useless.
+
+Define function to remove these columns.
+
+```{r}
+different_values <- 
+  function(x)
+    x %>% na.omit() %>% unique() %>% length()
+```
+
+```{r}
+remove_columns_with_the_same_value <- 
+  function(df)
+      select_if(df, function(col) different_values(col) > 1)
+```
+
+Apply function.
+
+```{r}
+num_of_cols_after_remove <- 
+  df %>% 
+  remove_columns_with_the_same_value() %>% 
+  ncol()
+```
+
+Calculate the number of columns with same value.
+
+```{r}
+ncol(df) - num_of_cols_after_remove
+```
+Awesom! Many colums found. 
+Let's remove them.
+
+```{r}
+df <- 
+  remove_columns_with_the_same_value(df)
+```
+
+## Inspecting dataframe
+
+Now let's deeply inspect into the dataframe.
+
+### View dataframe
+
+View dataframe.
+
+```{r echo=FALSE}
+paged_table(df)
+```
+
+### Renaming
+
+The column "...1" is the row number, so "n" will be a better name.
+The "...JSON" it's a bad name, just "json" is fine. 
+
+```{r}
+df <- 
+  df %>% 
+  rename(n = ...1, json=..JSON)
+```
+
+### Removing cols
+
+There are many duplicated cols, hashes & dates that can be removed, also many useless.
+
+#### Dates
+
+There are many dates in the dataset, that are not relevant for virus analysis. 
+So let's remove them.
+
+Define a function for check if a col is of type Date. 
+
+```{r}
+not <- 
+  function(x) !x
+
+get_element <- 
+  function(x, index) x[index]
+
+is_date_col <- 
+  function(col, pattern="^[:digit:]{4}[-:/][:digit:]{2}[-:/][:digit:]{2}")
+    col %>% 
+    as.character() %>% 
+    na.omit() %>% 
+    get_element(1) %>% 
+    str_detect(pattern)
+```
+
+Columns detected.
+
+```{r}
+df %>% 
+  select_if(is_date_col) %>% 
+  head() %>% 
+  paged_table()
+```
+
+Define function for remove cols by a predicate.
+
+```{r}
+remove_col_if <- 
+  function(df, fun){
+    cols_to_delete <- 
+      df %>% 
+      select_if(fun) %>% 
+      colnames()
+    df <- 
+      df %>% 
+      select(-cols_to_delete)
+    return(df)
+  }
+```
+
+Remove them.
+
+```{r}
+df <- 
+  remove_col_if(df, is_date_col)
+```
+
+#### Hashes
+
+There are many hashes cols that don't really provide useful information.
+So remove them.
+
+```{r}
+hashes <- 
+  c("")
+
+df <- 
+  df %>% 
+  select(
+    -vhash,
+    -sha256,
+    -sha1,
+    -scan_id,
+    -ssdeep,
+    -md5,
+    -additional_info.androguard.certificate.serialnumber,
+    -additional_info.androguard.certificate.thumbprint,
+    -additional_info.exiftool.ZipCRC
+  )
+```
+
+#### Scans
+
+There are many scans of different antivirus, that has very similar information.
+Just keep the scan with less NA values.
+
+Get the best col.
+
+```{r}
+scans_col_names <- 
+  df %>% 
+  colnames() %>% 
+  str_match_all("scans.[:alpha:]*.result") %>% 
+  unlist()
+
+scan_na_by_col <- 
+  df %>% 
+  select(all_of(scans_col_names)) %>%
+  num_of_NA_by_column()
+
+scan_col_witch_min_na <- 
+  scan_na_by_col %>% 
+  which.min()
+
+best_scanner_colname <- 
+  scan_na_by_col %>% 
+  names() %>% 
+  get_element(scan_col_witch_min_na)
+
+best_scanner_col <- 
+  df %>% 
+  select(all_of(best_scanner_colname))
+
+best_scanner_name <- 
+  best_scanner_colname %>% 
+  str_split("[.]") %>% 
+  unlist() %>% 
+  get_element(2)
+```
+```{r echo=FALSE}
+sprintf("Best scan col: %s", best_scanner_colname)
+sprintf("Best scanner: %s", best_scanner_name)
+```
+
+Drop all scans but the best.
+
+```{r}
+col_index_scanners <- 
+  df %>% 
+  colnames() %>% 
+  str_detect("scans") %>%
+  unlist() %>% 
+  which()
+
+df <- 
+  df %>% 
+  select(-all_of(col_index_scanners)) %>% 
+  cbind(best_scanner_col)
+```
+
+#### Individual columns
+
+**Reasons**:
+
+- json column contains all the row as JSON.
+- permalink is the URL where Virus Total has the virus file.
+- Main.Activity & Package are strings with all different values.
+- FileTypeExtension, ZipFileName & MIMEType has same values as FileType.
+- ZipBitFlag doesn't seems to matter.
+- additional_info.magic has the vesion of the ZIP file, that doesn't seems to matter.
+- Subject.DN is the JSON fragment that has all the information about the subject, but these data are decomposed in the rest of Subject cols.
+
+```{r}
+df <- 
+  df %>% 
+  select(
+    -json,
+    -permalink,
+    -additional_info.androguard.AndroidApplicationInfo,
+    -additional_info.androguard.Main.Activity,
+    -additional_info.exiftool.MIMEType,
+    -additional_info.exiftool.FileTypeExtension,
+    -additional_info.exiftool.ZipFileName,
+    -additional_info.magic,
+    -additional_info.androguard.Package,
+    -additional_info.androguard.certificate.Subject.DN,
+    -additional_info.compressedview.uncompressed_size
+  )
+```
+
+#### Groups of columns
+
+Define a function to remove cols which name match a pattern.
+
+```{r}
+remove_cols_which_name_match <- 
+  function(df, pattern){
+    cols_to_remove <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_removed_cols <- 
+      df %>% 
+      select(-all_of(cols_to_remove))
+    return(df_removed_cols)
+  }
+```
+
+Remove groups.
+
+**Reasons**:
+
+- Issuer group has the same information as Subject group.
+- CompressedView and RiskIndicator.APK groups have the same information as file_type group
+
+```{r}
+df <- 
+  df %>% 
+  remove_cols_which_name_match("^additional_info.androguard.certificate.Issuer.[:alpha:]*$") %>% 
+  remove_cols_which_name_match("^additional_info.compressedview.extensions.[:alpha:]*$") %>% 
+  remove_cols_which_name_match("^additional_info.androguard.RiskIndicator.APK.[:alpha:]*$")
+```
+
+### View results
+
+Define a function for sort columns.
+
+```{r}
+sort_cols <- 
+  function(df){
+    df <- 
+      df %>% 
+      select(order(colnames(df)))
+    additionalInfo_cols_logical <- 
+      df %>% 
+      colnames() %>% 
+      str_detect("additional_info")
+    additionalInfo_cols <- 
+      df %>% 
+      select(which(additionalInfo_cols_logical))
+    not_additionalInfo_cols <- 
+      df %>% 
+      select(which(!additionalInfo_cols_logical)) %>% 
+      select(n, size, everything())
+    return(cbind(not_additionalInfo_cols, additionalInfo_cols))
+  }
+```
+
+Sort columns.
+
+```{r}
+df <- 
+  sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
+```
+
+## Replacing values
+
+### Replace "Unknown" and "?" by NA
+
+There are some columns that hast the value "Unknown" or "?" instead of NAs. 
+So let's replace them.
+
+Define a function to replace values in cols that satisfy a predicate.
+
+```{r}
+replace_when <- 
+  function(df, fun, value, replacement){
+    cols_to_replace <- 
+      df %>% 
+      select_if(fun) %>% 
+      colnames()
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace(col, which(col==value), replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+Replace ? and Unknown for NAs.
+
+```{r}
+df <- 
+  df %>% 
+  replace_when(function(col) any(str_detect(col, fixed("Unknown"))), "Unknown", NA) %>% 
+  replace_when(function(col) any(str_detect(col, fixed("?"))), "?", NA)
+```
+
+### Replace NA for 0
+
+#### Define functions
+
+Define functions for replace NAs.
+
+```{r}
+replace_na_which_colname_match <- 
+  function(df, pattern, replacement){
+    cols_to_replace <- 
+      df %>% 
+      colnames() %>% 
+      str_which(pattern)
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+```{r}
+replace_na_when <- 
+  function(df, fun, replacement){
+    cols_to_replace <- 
+      df %>% 
+      select_if(fun) %>% 
+      colnames()
+    df_replaced_cols <- 
+      df %>% 
+      select(all_of(cols_to_replace)) %>% 
+      sapply(function(col) replace_na(col, replacement))
+    df_without_replaced_cols <- 
+      df %>% 
+      select(-all_of(cols_to_replace))
+    return(cbind(df_without_replaced_cols, df_replaced_cols))
+  }
+```
+
+#### Indiviual columns
+
+The columns AndroidApplication and APK.SHARED.LIBRARIES shoud have 0s insteas of NAs.
+
+```{r}
+df <- 
+  df %>% 
+  replace_na_which_colname_match("AndroidApplication", 0) %>% 
+  replace_na_which_colname_match("APK.SHARED.LIBRARIES", 0) 
+```
+
+#### Groups of colums
+
+The permissions (PERM) and the file types (file_types) groups of columns, seems that there are NAs where there should be 0s. 
+So it would be better to replace them.
+
+```{r}
+df <- 
+  df %>% 
+  replace_na_which_colname_match("PERM", 0) %>% 
+  replace_na_which_colname_match("file_types", 0)
+```
+
+### View results
+
+Sort columns.
+
+```{r}
+df <- 
+  sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
+```
+
+## New & modifiead colums
+
+There are columns that must be only one, others provide more information by operating two columns, or summarises information.
+
+### New total permissions column
+
+Create a new column that sums all permissions of permissions columns.
+
+```{r}
+pattern <- "additional_info.androguard.RiskIndicator.PERM"
+
+df_without_permissions <- 
+  df %>% 
+  select(., -(str_which(colnames(.), pattern)))
+
+df_permissions <- 
+  df %>% 
+  select(., str_which(colnames(.), pattern)) %>% 
+  mutate(., total_PERMs = rowSums(.))
+
+df <- cbind(df_without_permissions, df_permissions)
+```
+
+### Merge both MP3 columns into one
+
+There are two mp3 extension columns, one for .MP3 and the other for .mp3, both are mp3 files.
+The others columns has the name of the extension in upper case, so let's sum both into the MP3 column.
+
+```{r}
+mp3_cols_logical <- 
+  df %>% 
+  colnames() %>% 
+  tolower() %>% 
+  str_detect("mp3")
+mp3_upper_colname <- 
+  colnames(df)[which(mp3_cols_logical)] %>% 
+  str_match("^.*MP3$") %>% 
+  unlist() %>% 
+  na.omit()
+```
+```{r}
+sprintf("MP3 colname: %s", mp3_upper_colname)
+```
+
+Sum them into `r mp3_upper_colname`
+
+```{r}
+mp3_col <- 
+  df %>% 
+  select(which(mp3_cols_logical)) %>% 
+  rowSums(na.rm = TRUE)
+
+df <- 
+  df %>% 
+  select(-which(mp3_cols_logical)) %>% 
+  mutate(additional_info.compressedview.file_types.MP3 = mp3_col)
+```
+
+### Express increased uncompressed size as percentage
+
+There are two columns that refers to ZIP size, one for the compressed size and the other for the uncompressed size. It would be easier to compare them with the percentage of size increased after decompressed it.  
+
+```{r}
+increased_size_after_unzip <- 
+  df$additional_info.exiftool.ZipUncompressedSize / 
+  df$additional_info.exiftool.ZipCompressedSize
+
+df <- 
+  df %>% 
+  select(-additional_info.exiftool.ZipUncompressedSize,
+         -additional_info.exiftool.ZipCompressedSize) %>% 
+  mutate(additional_info.exiftool.ZipIncreasedUncompressedSize = increased_size_after_unzip)
+```
+
+### Suspicious heuristic as logical
+
+The column additional_info.trendmicro.housecall.heuristic has a suspicious flag for some rows, the others are NA. 
+
+1. So will be better to make this column logical: 
+  - NA -> FALSE
+  - Suspicious -> True
+  
+2. Also rename it to make it more understandable: 
+  - additional_info.trendmicro.housecall.heuristic -> additional_info.suspicious
+
+```{r}
+suspicious <- 
+  df$additional_info.trendmicro.housecall.heuristic %>% 
+  is.na() %>% 
+  not()
+
+df <- 
+  df %>% 
+  select(-additional_info.trendmicro.housecall.heuristic) %>% 
+  mutate(additional_info.suspicious = suspicious)
+```
+
+### Decompose unpacker
+
+he column additional_info.f.prot.unpacker has two possible values: "appended" and "UTF-8", and when both happen they are combined into "appended, UTF-8". So will be better to split this column into one logical for each of them.
+
+Compute columns.
+
+```{r}
+unpacker_appended <- 
+  df$additional_info.f.prot.unpacker %>% 
+  sapply(function(str) str_detect(str, "appended")) %>% 
+  replace_na(FALSE)
+
+unpacker_utf8 <- 
+  df$additional_info.f.prot.unpacker %>% 
+  sapply(function(str) str_detect(str, "UTF-8")) %>% 
+  replace_na(FALSE)
+```
+Add them to dataframe.
+
+```{r}
+df <- 
+  df %>% 
+  select(-additional_info.f.prot.unpacker) %>%
+  mutate(additional_info.f.prot.unpacker.appended = unpacker_appended,
+         additional_info.f.prot.unpacker.UTF8 = unpacker_utf8)
+```
+
+### Decompose trid
+
+The column additional_info.trid has percentages of archives.
+
+```{r}
+df$additional_info.trid[1]
+```
+
+Will be better to decompose this column into a column with the percentage for each value.
+
+#### Extract values and percentages
+
+```{r}
+trid_split_lines <- 
+  df$additional_info.trid %>% 
+  sapply(function(str) str_split(str, "\n"))
+trid_split_lines[[3]]
+```
+
+
+```{r}
+trid_split_value_percentage <- 
+  trid_split_lines %>%
+  sapply(function(row) 
+    sapply(row, function(str) 
+      str_split(str, " \\(|%\\)")))
+trid_split_value_percentage[[1]][[3]]
+```
+
+```{r}
+trid_values <- 
+  trid_split_value_percentage %>% 
+  sapply(function(row) 
+    sapply(row, function(value_percentage) 
+      get_element(value_percentage, 1)))
+trid_values[[1]]
+```
+
+```{r}
+trid_percentage <- 
+  trid_split_value_percentage %>% 
+  sapply(function(row) 
+    sapply(row, function(value_percentage) 
+      as.double(get_element(value_percentage, 
+        length(value_percentage) - 1))))
+trid_percentage[[1]]
+```
+
+Define a function to convert the name to a proper trid colname.
+
+```{r}
+trid_to_colname <- 
+  function(name)
+    name %>% 
+      str_to_title() %>% 
+      str_match_all("[:alpha:]*") %>% 
+      unlist() %>% 
+      paste0(collapse = " ") %>%
+      str_remove_all(" ") %>% 
+      sapply(function(name) paste("additional_info.trid", name, sep = "."))
+```
+
+Define function for rename the percentages.
+
+```{r}
+rename_as_value <- 
+  function(v){
+    values_names <- 
+      names(v) %>% 
+      sapply(function(name) str_split(name, " \\(")) %>% 
+      sapply(function(name_split) get_element(name_split, 1)) %>% 
+      sapply(trid_to_colname)
+    names(v) <- values_names
+    return(v)
+  }
+trid_percentage[[1]] %>% 
+  rename_as_value()
+```
+
+Rename the percentages.
+
+```{r}
+trid_percentage_names_as_value <- 
+  trid_percentage %>% 
+  sapply(rename_as_value)
+trid_percentage_names_as_value[[1]]
+```
+
+#### Create columns
+
+Get columns names.
+
+```{r}
+trid_labels <- 
+  trid_values %>% 
+  unlist() %>% 
+  unique()
+trid_labels
+```
+```{r}
+trid_values_colnames <- 
+  trid_labels %>% 
+  sapply(trid_to_colname)
+trid_values_colnames
+```
+
+Create an empty tibble with colnames set.
+
+```{r warning=FALSE}
+df_trid <- 
+  matrix(nrow = nrow(df), 
+         ncol = length(trid_values_colnames)) %>% 
+  as_tibble(.name_repair = ~ trid_values_colnames) %>% 
+  mutate_each(as.double)
+```
+
+Colnames.
+
+```{r}
+df_trid %>% 
+  colnames()
+```
+
+Types.
+
+```{r}
+df_trid %>% 
+  sapply(is.double) %>% 
+  sum() == ncol(df_trid)
+```
+Insert values.
+
+```{r}
+for(row_index in 1:nrow(df)){
+  row <- trid_percentage_names_as_value[[row_index]]
+  for(percentage_index in 1:length(row)){
+    percentage <- row[percentage_index]
+    colname <- names(percentage)
+    df_trid[row_index, colname] <- percentage
+  }
+}
+```
+
+Replace NA for 0.
+
+```{r}
+df_trid <- 
+  df_trid %>% 
+  replace(is.na(.), 0)
+```
+
+#### Merge dataframes
+
+Finally merge df and df_trid into one.
+
+```{r}
+df <- 
+  df %>% 
+  select(-additional_info.trid) %>% 
+  cbind(df_trid)
+```
+
+### View results
+
+Sort columns.
+
+```{r}
+df <- 
+  sort_cols(df)
+```
+
+View results.
+
+```{r echo=FALSE}
+paged_table(df)
+```
+
+## Save dataframe
+
+After all preprocessing let's save it into CSV.
+
+```{r}
+write.csv(df, path_export)
+```
+
+## Functions for preprocessing
+
+### As factor
+
+```{r}
+labels <- 
+  function(n){
+    if(n == 5){
+      return(c("very low", "low", "medium", "high", "very high"))
+    }else if(n == 4){
+      return(c("very low", "low", "high", "very high"))
+    }else if(n == 3){
+      return(c("low", "medium", "high"))
+    }else if(n == 2){
+      return(c("low", "high"))
+    }else{
+      stop("Not avalible")
+    }
+  }
+
+cut_by_quantiles <- 
+  function(col){
+    quantiles <- 
+      col %>% 
+      quantile(na.rm = TRUE) %>% 
+      unique()
+    if(length(quantiles) > 2){
+      col <- 
+        col %>% 
+        cut(breaks = quantiles, 
+            labels = labels(length(quantiles)-1),
+            include.lowest = TRUE)
+    }
+    return(col)
+  }
+
+df_cut_by_quantiles <- 
+  function(df){
+    df_without_numeric <- 
+      df[sapply(df, function(col) !is.numeric(col))]
+    df_numeric <- 
+      df %>% 
+      select_if(is.numeric)
+    df_numeric <- 
+      df_numeric %>% 
+      lapply(cut_by_quantiles)
+    return(cbind(df_without_numeric, df_numeric))
+  }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
