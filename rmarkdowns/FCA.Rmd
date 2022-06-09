@@ -1,0 +1,63 @@
+---
+title: "FCA"
+author: "Ángel Sergio"
+date: '2022-06-08'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r librerias,echo=TRUE}
+library(fcaR)
+library(dplyr)
+library(readr)
+library(tidyverse)
+```
+
+```{r}
+path_import_o = "../virusTotal/data/original.csv"
+```
+
+
+```{r import, include=FALSE}
+virus_o <- read_csv(path_import_o)
+virus_o <- virus_o %>% select(contains('detected'))
+View(virus_o)
+```
+
+```{r import, include=FALSE}
+
+
+# transforma en caracter para aplicar difuso posteriormente
+virus_detected <- sapply(virus_o[, c(1:66)], as.character)
+
+# Los valores na corresponen a datos que no se han podido procesar
+virus_detected[is.na(virus_detected)]<-"UNABLE TO PROCESS"
+View(virus_detected)
+
+```
+
+```{r import, include=FALSE}
+#Escalamos las variables como difuso
+fc <- FormalContext$new(virus_detected)
+
+
+#Recorremos las columnas y aplicamos un escalado nominal
+for (i in 1:ncol(virus_o)){
+  fc$scale(colnames(virus_o[i]), type = "nominal")
+}
+
+```
+
+```{r find,echo=TRUE}
+fc$find_implications(verbose = FALSE)
+#fc$find_concepts()
+#fc$concepts$plot()
+```
+
+
+
+

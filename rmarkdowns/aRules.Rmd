@@ -19,16 +19,22 @@ library(stringr)
 library(tidyverse)
 ```
 
+
+```{r}
+path_import = "../virusTotal/data/original.csv"
+path_export = "../virusTotal/data/dataDiscretized.csv"
+```
+
 ### Import of the VirusTotal dataset.
 
 ```{r import, include=FALSE}
-virus <- read_csv('../VirusTotal/data/virusTotal.csv')
+virus <- read_csv(path_import)
 ```
 
 ### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
 ```{r lectura, include=FALSE}
-virus <- read_csv('../VirusTotal/data/virusTotal.csv')
+
  
 
 replace_na_which_colname_match <- 
@@ -146,6 +152,13 @@ View(df_test)
 df_discretize <- df_test %>% select(c( 1,2,4,5,8,9))
 View(df_discretize )
 ```
+
+```{r}
+write.csv(df_discretize, path_export)
+```
+
+
+
 
 ### We use the apriori method with standard confidence and support values.
 
