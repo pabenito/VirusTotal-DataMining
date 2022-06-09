@@ -2,7 +2,14 @@
 title: "FCA"
 author: "Ángel Sergio"
 date: '2022-06-08'
-output: html_document
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +27,7 @@ library(tidyverse)
 path_import_o = "../virusTotal/data/original.csv"
 ```
 
-```{r import, include=FALSE}
+```{r}
 virus_o <- read_csv(path_import_o)
 ```
 
@@ -28,7 +35,7 @@ virus_o <- read_csv(path_import_o)
 
 ### we create a reduced dummie of the data frame to reduce the time it takes to find implications and concepts
 
-```{r dummie, include=FALSE}
+```{r}
 
 virus_o <- virus_o %>% select(contains('detected')) %>% select(c(1:30,64)) %>% 
   slice(1:60)
@@ -41,13 +48,13 @@ colnames(virus_o)<-gsub(".detected","",colnames(virus_o))
 
 ### We leave only the antivirus name
 
-```{r name, include=FALSE}
+```{r}
 
 colnames(virus_o)<-gsub("scans.","",colnames(virus_o))
 colnames(virus_o)<-gsub(".detected","",colnames(virus_o))
 ```
 
-```{r view, include=FALSE}
+```{r}
 View(virus_o)
 ```
 
@@ -55,7 +62,7 @@ View(virus_o)
 
 ### Null values symbolize that the file could not be processed.
 
-```{r detected, include=FALSE}
+```{r}
 
 virus_detected <- sapply(virus_o[, c(1:31)], as.character)
 
@@ -63,13 +70,13 @@ virus_detected <- sapply(virus_o[, c(1:31)], as.character)
 virus_detected[is.na(virus_detected)]<-"UNABLE TO PROCESS"
 ```
 
-```{r view, include=FALSE}
+```{r}
 View(virus_detected)
 ```
 
 ### We go through the columns and apply a nominal scaling.
 
-```{r import, include=FALSE}
+```{r}
 #We create the formal context
 fc <- FormalContext$new(virus_detected)
 
@@ -81,31 +88,31 @@ for (i in 1:ncol(virus_o)){
 
 ### Removes duplicated attributes and objects.
 
-```{r import, include=FALSE}
+```{r , include=FALSE}
 fc$clarify(TRUE)
 ```
 
 ### Implications and concepts with some examples
 
-```{r find,echo=TRUE}
+```{r ,echo=TRUE}
 fc$find_implications()
 ```
 
-```{r find,echo=TRUE}
+```{r ,echo=TRUE}
 fc$find_concepts()
 ```
 
-```{r find,echo=TRUE}
+```{r ,echo=TRUE}
 fc$implications[77]
 ```
 
-```{r find,echo=TRUE}
+```{r ,echo=TRUE}
 fc$concepts[16]
 ```
 
 ### Avast acquired AVG in 2016, so they currently use the same engine with some different features. If our study has been carried out correctly, AVG=TRUE (detected as virus) should be a closure to Avast = TRUE.
 
-```{r closure,echo=TRUE}
+```{r closure}
 S <- Set$new(attributes = fc$attributes)
 S$assign("Avast = TRUE" = 1)
 cat("Given the attribute:")
