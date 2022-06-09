@@ -1,6 +1,6 @@
 ---
 title: "FCA"
-author: "Ángel Sergio"
+author: "Ángel Sergio Sánchez Marín"
 date: '2022-06-08'
 output:
   prettydoc::html_pretty:
