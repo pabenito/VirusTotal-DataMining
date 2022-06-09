@@ -236,7 +236,7 @@ df %>%
   paged_table()
 ```
 
-## Regression
+## Regression - Iteration 1
 
 The idea is to get the best models to predict the most important variables of the dataset.
 
@@ -244,7 +244,11 @@ How to get the best model?
 
 1. Compute all one variable models for target
 2. Sort them by R2-ajusted
-3. Iteratively add the best predicted variable remaining from the sorted list while R2-ajusted increase. 
+3. Iteratively while R2-adjusted does not get worse:
+- Add the best predicted variable remaining from the sorted list to the lineal model.
+- Check if there are useless variables to remove. Called as useless those predictors whose p-value is over 0.05.
+- Remove useless if is necessary.
+- Compute R2-adjusted.
 
 This method compute the best model?
 
@@ -303,6 +307,28 @@ get_r2_adjusted <-
 ```
 
 ```{r}
+get_pvalues <-
+  function(lm, intercept = TRUE){
+    coefs_df <- 
+      lm %>% 
+      summary() %>% 
+      coef() %>% 
+      as.data.frame()
+    pvales <- 
+      coefs_df$`Pr(>|t|)`
+    names(pvales) <- 
+      coefs_df %>% 
+      rownames() %>% 
+      str_replace(fixed("(Intercept)"), "1")
+    if(!intercept){
+      pvales <- 
+        pvales[2:length(pvales)]
+    }
+    return(pvales)
+  }
+```
+
+```{r}
 sort_models <- function(models){
   models_r2 <- 
     models %>% 
@@ -351,7 +377,7 @@ get_predictors_names <-
     predictors <- 
       predictors_str %>% 
       as.character() %>% 
-      str_remove_all(fixed("+")) %>% 
+      str_remove_all("\\+|\\-|-[:blank:]1") %>% 
       str_split(fixed(" ")) %>% 
       unlist()
     predictors <- 
@@ -361,31 +387,16 @@ get_predictors_names <-
 ```
 
 ```{r}
-lm_add_variable <- 
-  function(lm, variable_names){
-    target <- 
-      get_target_name(lm)
-    predictors <- 
-      get_predictors_names(lm_test)
-    predictors_str <- 
-      paste(predictors, collapse = " + ")
-    formula_str <- 
-      paste(target, predictors_str, sep = " ~ ")
-    formula <- 
-      formula_str %>% 
-      as.formula()
-    new_lm <- 
-      lm(formula, data = lm$model)
-  }
-```
-
-```{r}
 lm_from_names <- 
-  function(df, target, predictors){
+  function(df, target, predictors, intercept = TRUE){
     predictors_str <- 
       paste(predictors, collapse = " + ")
     formula_str <- 
       paste(target, predictors_str, sep = " ~ ")
+    if(!intercept){
+      formula_str <- 
+        paste(formula_str, "1", sep = " - ")
+    }
     formula <- 
       formula_str %>% 
       as.formula()
@@ -403,17 +414,27 @@ best_model <-
     idx <- 1
     r2_adjusted_prev <- -Inf
     r2_adjusted_current <- 0
-    lm <- NA
-    while(r2_adjusted_current > r2_adjusted_prev){
-      lm <- 
+    lm_current <- NA
+    while(r2_adjusted_current >= r2_adjusted_prev){
+      lm_current <- 
+        lm_from_names(df, target, predictors_rank[1:idx])
+      pvalues <- 
+        get_pvalues(lm_current, FALSE)
+      useless <- 
+        pvalues[pvalues > 0.05] %>% 
+        names()
+      predictors_rank <- 
+        predictors_rank[!(predictors_rank %in% useless)]
+      idx <- idx - length(useless)
+      lm_current <- 
         lm_from_names(df, target, predictors_rank[1:idx])
       r2_adjusted_prev <- 
         r2_adjusted_current
       r2_adjusted_current <- 
-        get_r2_adjusted(lm)
+        get_r2_adjusted(lm_current)
       idx <- idx + 1
     }
-    return(lm)
+    return(lm_current)
   }
 ```
 
@@ -429,20 +450,18 @@ best_models <-
 
 ### Compute best lineal models
 
+Compute best models for important variables.
+
 ```{r}
 best_models_main_variables <- 
   best_models(df, important_columns_names)
 ```
 
-### View results
+## View results - Iteration 1
 
-```{r}
-best_models_summary <- 
-  best_models_main_variables %>% 
-  lapply(summary)
-names(best_models_summary) <- 
-  important_columns_names
-```
+### R2-adjusted
+
+Calc R2-adjusted.
 
 ```{r}
 best_models_r2 <- 
@@ -456,6 +475,47 @@ names(best_models_r2) <-
 best_models_r2 %>% 
   sort(decreasing = TRUE)
 ```
+### Summary
+
+```{r}
+best_models_summary <- 
+  best_models_main_variables %>% 
+  lapply(summary)
+names(best_models_summary) <- 
+  important_columns_names
+```
+
+```{r}
+best_models_summary$harmless_votes
+best_models_summary$malicious_votes
+best_models_summary$size
+best_models_summary$total
+best_models_summary$positives
+best_models_summary$times_submitted
+```
+
+The most characteristic patterns are:
+
+- Harmless_votes and malicious_votes are highly correlated between them, both has in common to be influenced by community_reputation.
+- Size is correlated with the number of files some times, what make sense. Maybe a column of the total files would be a good way to predict the size.
+
+## Regression - Iteration 2 
+
+### Correlation between harmless_votes adn malicious_votes
+
+```{r}
+df %>% 
+  ggplot(harmless_votes ~ malicious_votes) +
+  geom_smooth(method = "lm")
+```
+
+
+## View results - Iteration 2
+
+## Conclusions
+
+
+
 
 
 

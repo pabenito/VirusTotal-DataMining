@@ -1601,9 +1601,16 @@ variables of the dataset.</p>
 <ol style="list-style-type: decimal">
 <li>Compute all one variable models for target</li>
 <li>Sort them by R2-ajusted</li>
-<li>Iteratively add the best predicted variable remaining from the
-sorted list while R2-ajusted increase.</li>
+<li>Iteratively while R2-adjusted does not get worse:</li>
 </ol>
+<ul>
+<li>Add the best predicted variable remaining from the sorted list to
+the lineal model.</li>
+<li>Check if there are useless variables to remove. Called as useless
+those predictors whose p-value is over 0.05.</li>
+<li>Remove useless if is necessary.</li>
+<li>Compute R2-adjusted.</li>
+</ul>
 <p>This method compute the best model?</p>
 <p>No, it’s no the best model, but it’s a good approach to get a good
 enough model without much computing.</p>
@@ -1643,80 +1650,87 @@ row number column “n”.</p>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>get_r2_adjusted <span class="ot">&lt;-</span> </span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm)</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">r2</span>(lm)[[<span class="dv">2</span>]]</span></code></pre></div>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sort_models <span class="ot">&lt;-</span> <span class="cf">function</span>(models){</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  models_r2 <span class="ot">&lt;-</span> </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    models <span class="sc">%&gt;%</span> </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sapply</span>(get_r2_adjusted)</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  models_df <span class="ot">&lt;-</span> </span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">model =</span> models, <span class="at">r2 =</span> models_r2) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(r2)) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(<span class="st">&quot;model&quot;</span>)</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rank_one_variable_models <span class="ot">&lt;-</span> </span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, target){</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    rank <span class="ot">&lt;-</span> </span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span> </span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_one_variable_models</span>(target) <span class="sc">%&gt;%</span> </span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>      sort_models</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(rank)</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>get_target_name <span class="ot">&lt;-</span> </span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm){</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    lm_terms <span class="ot">&lt;-</span> </span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>      lm_test <span class="sc">%&gt;%</span> </span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">terms</span>()</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    predicted <span class="ot">&lt;-</span> </span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>      lm_terms[[<span class="dv">2</span>]] <span class="sc">%&gt;%</span> </span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>()</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(predicted)</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>get_predictors_names <span class="ot">&lt;-</span> </span>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>get_pvalues <span class="ot">&lt;-</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm, <span class="at">intercept =</span> <span class="cn">TRUE</span>){</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    coefs_df <span class="ot">&lt;-</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>      lm <span class="sc">%&gt;%</span> </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">coef</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.data.frame</span>()</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    pvales <span class="ot">&lt;-</span> </span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>      coefs_df<span class="sc">$</span><span class="st">`</span><span class="at">Pr(&gt;|t|)</span><span class="st">`</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(pvales) <span class="ot">&lt;-</span> </span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>      coefs_df <span class="sc">%&gt;%</span> </span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rownames</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_replace</span>(<span class="fu">fixed</span>(<span class="st">&quot;(Intercept)&quot;</span>), <span class="st">&quot;1&quot;</span>)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span>intercept){</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>      pvales <span class="ot">&lt;-</span> </span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>        pvales[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(pvales)]</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(pvales)</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>sort_models <span class="ot">&lt;-</span> <span class="cf">function</span>(models){</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  models_r2 <span class="ot">&lt;-</span> </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    models <span class="sc">%&gt;%</span> </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sapply</span>(get_r2_adjusted)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  models_df <span class="ot">&lt;-</span> </span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">model =</span> models, <span class="at">r2 =</span> models_r2) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(r2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(<span class="st">&quot;model&quot;</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>rank_one_variable_models <span class="ot">&lt;-</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, target){</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    rank <span class="ot">&lt;-</span> </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span> </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">all_one_variable_models</span>(target) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>      sort_models</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(rank)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>get_target_name <span class="ot">&lt;-</span> </span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm){</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    lm_terms <span class="ot">&lt;-</span> </span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>      lm <span class="sc">%&gt;%</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>      lm_test <span class="sc">%&gt;%</span> </span>
 <span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>() <span class="sc">%&gt;%</span> </span>
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">terms</span>()</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    predictors_str <span class="ot">&lt;-</span> </span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>      lm_terms[[<span class="dv">3</span>]]</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    predictors <span class="ot">&lt;-</span> </span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>      predictors_str <span class="sc">%&gt;%</span> </span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_remove_all</span>(<span class="fu">fixed</span>(<span class="st">&quot;+&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_split</span>(<span class="fu">fixed</span>(<span class="st">&quot; &quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unlist</span>()</span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    predictors <span class="ot">&lt;-</span> </span>
-<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>      predictors[predictors <span class="sc">!=</span> <span class="st">&quot;&quot;</span>]</span>
-<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(predictors)</span>
-<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>lm_add_variable <span class="ot">&lt;-</span> </span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm, variable_names){</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> </span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_target_name</span>(lm)</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    predictors <span class="ot">&lt;-</span> </span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_predictors_names</span>(lm_test)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    predicted <span class="ot">&lt;-</span> </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>      lm_terms[[<span class="dv">2</span>]] <span class="sc">%&gt;%</span> </span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>()</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(predicted)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>get_predictors_names <span class="ot">&lt;-</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(lm){</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    lm_terms <span class="ot">&lt;-</span> </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>      lm <span class="sc">%&gt;%</span> </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">terms</span>()</span>
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    predictors_str <span class="ot">&lt;-</span> </span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(predictors, <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>)</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    formula_str <span class="ot">&lt;-</span> </span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(target, predictors_str, <span class="at">sep =</span> <span class="st">&quot; ~ &quot;</span>)</span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> </span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>      formula_str <span class="sc">%&gt;%</span> </span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.formula</span>()</span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    new_lm <span class="ot">&lt;-</span> </span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lm</span>(formula, <span class="at">data =</span> lm<span class="sc">$</span>model)</span>
-<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>      lm_terms[[<span class="dv">3</span>]]</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    predictors <span class="ot">&lt;-</span> </span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>      predictors_str <span class="sc">%&gt;%</span> </span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.character</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_remove_all</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">+|</span><span class="sc">\\</span><span class="st">-|-[:blank:]1&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">str_split</span>(<span class="fu">fixed</span>(<span class="st">&quot; &quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unlist</span>()</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    predictors <span class="ot">&lt;-</span> </span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>      predictors[predictors <span class="sc">!=</span> <span class="st">&quot;&quot;</span>]</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(predictors)</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>lm_from_names <span class="ot">&lt;-</span> </span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, target, predictors){</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, target, predictors, <span class="at">intercept =</span> <span class="cn">TRUE</span>){</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    predictors_str <span class="ot">&lt;-</span> </span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(predictors, <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>)</span>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    formula_str <span class="ot">&lt;-</span> </span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(target, predictors_str, <span class="at">sep =</span> <span class="st">&quot; ~ &quot;</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> </span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>      formula_str <span class="sc">%&gt;%</span> </span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.formula</span>()</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    lm <span class="ot">&lt;-</span> </span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lm</span>(formula, <span class="at">data =</span> df)</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span>intercept){</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>      formula_str <span class="ot">&lt;-</span> </span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">paste</span>(formula_str, <span class="st">&quot;1&quot;</span>, <span class="at">sep =</span> <span class="st">&quot; - &quot;</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> </span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>      formula_str <span class="sc">%&gt;%</span> </span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">as.formula</span>()</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    lm <span class="ot">&lt;-</span> </span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lm</span>(formula, <span class="at">data =</span> df)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>best_model <span class="ot">&lt;-</span> </span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, target){</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    predictors_rank <span class="ot">&lt;-</span> </span>
@@ -1725,18 +1739,28 @@ row number column “n”.</p>
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    r2_adjusted_prev <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
 <span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    r2_adjusted_current <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    lm <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(r2_adjusted_current <span class="sc">&gt;</span> r2_adjusted_prev){</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>      lm <span class="ot">&lt;-</span> </span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    lm_current <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(r2_adjusted_current <span class="sc">&gt;=</span> r2_adjusted_prev){</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>      lm_current <span class="ot">&lt;-</span> </span>
 <span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">lm_from_names</span>(df, target, predictors_rank[<span class="dv">1</span><span class="sc">:</span>idx])</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>      r2_adjusted_prev <span class="ot">&lt;-</span> </span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>        r2_adjusted_current</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>      r2_adjusted_current <span class="ot">&lt;-</span> </span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">get_r2_adjusted</span>(lm)</span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>      idx <span class="ot">&lt;-</span> idx <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(lm)</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>      pvalues <span class="ot">&lt;-</span> </span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">get_pvalues</span>(lm_current, <span class="cn">FALSE</span>)</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>      useless <span class="ot">&lt;-</span> </span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>        pvalues[pvalues <span class="sc">&gt;</span> <span class="fl">0.05</span>] <span class="sc">%&gt;%</span> </span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">names</span>()</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>      predictors_rank <span class="ot">&lt;-</span> </span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>        predictors_rank[<span class="sc">!</span>(predictors_rank <span class="sc">%in%</span> useless)]</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>      idx <span class="ot">&lt;-</span> idx <span class="sc">-</span> <span class="fu">length</span>(useless)</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>      lm_current <span class="ot">&lt;-</span> </span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">lm_from_names</span>(df, target, predictors_rank[<span class="dv">1</span><span class="sc">:</span>idx])</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>      r2_adjusted_prev <span class="ot">&lt;-</span> </span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>        r2_adjusted_current</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>      r2_adjusted_current <span class="ot">&lt;-</span> </span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">get_r2_adjusted</span>(lm_current)</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>      idx <span class="ot">&lt;-</span> idx <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(lm_current)</span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>best_models <span class="ot">&lt;-</span> </span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(df, targets){</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    best_models <span class="ot">&lt;-</span> </span>
@@ -1747,27 +1771,223 @@ row number column “n”.</p>
 </div>
 <div id="compute-best-lineal-models" class="section level3">
 <h3>Compute best lineal models</h3>
+<p>Compute best models for important variables.</p>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>best_models_main_variables <span class="ot">&lt;-</span> </span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">best_models</span>(df, important_columns_names)</span></code></pre></div>
 </div>
 <div id="view-results" class="section level3">
 <h3>View results</h3>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>best_models_summary <span class="ot">&lt;-</span> </span>
+<div id="r2-adjusted" class="section level4">
+<h4>R2-adjusted</h4>
+<p>Calc R2-adjusted.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>best_models_r2 <span class="ot">&lt;-</span> </span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  best_models_main_variables <span class="sc">%&gt;%</span> </span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(summary)</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(best_models_summary) <span class="ot">&lt;-</span> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(get_r2_adjusted)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(best_models_r2) <span class="ot">&lt;-</span> </span>
 <span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  important_columns_names</span></code></pre></div>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>best_models_r2 <span class="ot">&lt;-</span> </span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  best_models_main_variables <span class="sc">%&gt;%</span> </span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(get_r2_adjusted)</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(best_models_r2) <span class="ot">&lt;-</span> </span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  important_columns_names</span></code></pre></div>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>best_models_r2 <span class="sc">%&gt;%</span> </span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>best_models_r2 <span class="sc">%&gt;%</span> </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>##  harmless_votes malicious_votes     total_PERMs            size           total 
-##       0.9990454       0.9882353       0.9653559       0.6062563       0.3886337 
+##       0.9990731       0.9942802       0.9816816       0.6683957       0.3840575 
 ##       positives times_submitted 
-##       0.1380019       0.1151038</code></pre>
+##       0.3141946       0.1166208</code></pre>
+</div>
+<div id="summary" class="section level4">
+<h4>Summary</h4>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>best_models_summary <span class="ot">&lt;-</span> </span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  best_models_main_variables <span class="sc">%&gt;%</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(summary)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(best_models_summary) <span class="ot">&lt;-</span> </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  important_columns_names</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>harmless_votes</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.36657 -0.00136  0.00154  0.01933  0.02897 
+## 
+## Coefficients:
+##                                                 Estimate Std. Error t value
+## (Intercept)                                   -5.931e-02  4.527e-03 -13.101
+## unique_sources                                 3.033e-02  9.403e-04  32.260
+## malicious_votes                                1.951e-01  3.872e-02   5.038
+## community_reputation                           3.463e-03  9.708e-04   3.567
+## additional_info.trid.MozillaArchiveFormat      3.051e-03  8.863e-04   3.442
+## additional_info.compressedview.file_types.PNG  4.052e-05  1.485e-05   2.729
+##                                               Pr(&gt;|t|)    
+## (Intercept)                                    &lt; 2e-16 ***
+## unique_sources                                 &lt; 2e-16 ***
+## malicious_votes                               1.15e-06 ***
+## community_reputation                          0.000464 ***
+## additional_info.trid.MozillaArchiveFormat     0.000720 ***
+## additional_info.compressedview.file_types.PNG 0.006991 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.04051 on 177 degrees of freedom
+## Multiple R-squared:  0.9991, Adjusted R-squared:  0.9991 
+## F-statistic: 3.923e+04 on 5 and 177 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>malicious_votes</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.01685 -0.00534 -0.00534 -0.00534  0.97722 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           0.005335   0.005430   0.983    0.327    
+## harmless_votes        0.688984   0.004705 146.429   &lt;2e-16 ***
+## community_reputation -0.017440   0.001263 -13.811   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.07304 on 180 degrees of freedom
+## Multiple R-squared:  0.9943, Adjusted R-squared:  0.9943 
+## F-statistic: 1.582e+04 on 2 and 180 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>size</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -41673771   -826734   -535594    831127  64617531 
+## 
+## Coefficients:
+##                                                               Estimate
+## (Intercept)                                                     832680
+## additional_info.compressedview.file_types.unknown                69765
+## additional_info.compressedview.file_types.ELF                  1983038
+## additional_info.compressedview.file_types.Portable.Executable   701606
+## additional_info.trid.VymMindMap                                2662922
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES -2335274
+## additional_info.compressedview.file_types.HTML                 2736559
+##                                                               Std. Error
+## (Intercept)                                                       816854
+## additional_info.compressedview.file_types.unknown                   9050
+## additional_info.compressedview.file_types.ELF                     189875
+## additional_info.compressedview.file_types.Portable.Executable     164994
+## additional_info.trid.VymMindMap                                   375009
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES     339745
+## additional_info.compressedview.file_types.HTML                    949445
+##                                                               t value Pr(&gt;|t|)
+## (Intercept)                                                     1.019  0.30942
+## additional_info.compressedview.file_types.unknown               7.709 8.98e-13
+## additional_info.compressedview.file_types.ELF                  10.444  &lt; 2e-16
+## additional_info.compressedview.file_types.Portable.Executable   4.252 3.43e-05
+## additional_info.trid.VymMindMap                                 7.101 2.94e-11
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES  -6.874 1.05e-10
+## additional_info.compressedview.file_types.HTML                  2.882  0.00444
+##                                                                  
+## (Intercept)                                                      
+## additional_info.compressedview.file_types.unknown             ***
+## additional_info.compressedview.file_types.ELF                 ***
+## additional_info.compressedview.file_types.Portable.Executable ***
+## additional_info.trid.VymMindMap                               ***
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES ***
+## additional_info.compressedview.file_types.HTML                ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9576000 on 176 degrees of freedom
+## Multiple R-squared:  0.6793, Adjusted R-squared:  0.6684 
+## F-statistic: 62.14 on 6 and 176 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>total</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.7959 -0.7188 -0.0609  0.9391  2.9002 
+## 
+## Coefficients:
+##                                                                Estimate
+## (Intercept)                                                   59.099805
+## additional_info.trid.AndroidPackage                            0.034405
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES  0.229673
+##                                                               Std. Error
+## (Intercept)                                                     0.185072
+## additional_info.trid.AndroidPackage                             0.004158
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES   0.035247
+##                                                               t value Pr(&gt;|t|)
+## (Intercept)                                                   319.334  &lt; 2e-16
+## additional_info.trid.AndroidPackage                             8.275 2.79e-14
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES   6.516 7.01e-10
+##                                                                  
+## (Intercept)                                                   ***
+## additional_info.trid.AndroidPackage                           ***
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.575 on 180 degrees of freedom
+## Multiple R-squared:  0.3908, Adjusted R-squared:  0.3841 
+## F-statistic: 57.74 on 2 and 180 DF,  p-value: &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>positives</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -8.859 -2.185 -0.403  2.048 12.095 
+## 
+## Coefficients:
+##                                                               Estimate
+## (Intercept)                                                   20.95182
+## additional_info.androguard.RiskIndicator.PERM.MONEY            2.95357
+## community_reputation                                          -0.18760
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES -0.54880
+##                                                               Std. Error
+## (Intercept)                                                      0.32890
+## additional_info.androguard.RiskIndicator.PERM.MONEY              0.38510
+## community_reputation                                             0.05690
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES    0.09193
+##                                                               t value Pr(&gt;|t|)
+## (Intercept)                                                    63.703  &lt; 2e-16
+## additional_info.androguard.RiskIndicator.PERM.MONEY             7.670 1.06e-12
+## community_reputation                                           -3.297  0.00118
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES  -5.970 1.25e-08
+##                                                                  
+## (Intercept)                                                   ***
+## additional_info.androguard.RiskIndicator.PERM.MONEY           ***
+## community_reputation                                          ** 
+## additional_info.androguard.RiskIndicator.APK.SHARED.LIBRARIES ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.782 on 179 degrees of freedom
+## Multiple R-squared:  0.3255, Adjusted R-squared:  0.3142 
+## F-statistic: 28.79 on 3 and 179 DF,  p-value: 3.057e-15</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>best_models_summary<span class="sc">$</span>times_submitted</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = formula, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -684.24   -8.07   -8.07   -7.07 3083.15 
+## 
+## Coefficients:
+##                                                         Estimate Std. Error
+## (Intercept)                                                9.071     18.543
+## additional_info.androguard.RiskIndicator.PERM.EPHEMERAL  225.390     45.054
+##                                                         t value Pr(&gt;|t|)    
+## (Intercept)                                               0.489    0.625    
+## additional_info.androguard.RiskIndicator.PERM.EPHEMERAL   5.003 1.33e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 247.1 on 181 degrees of freedom
+## Multiple R-squared:  0.1215, Adjusted R-squared:  0.1166 
+## F-statistic: 25.03 on 1 and 181 DF,  p-value: 1.331e-06</code></pre>
+</div>
 </div>
 </div>
 </div>
