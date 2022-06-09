@@ -58,6 +58,12 @@ Library for manage strings.
 library(stringr)
 ```
 
+Library for data presentation.
+
+```{r message=FALSE}
+library(scales)
+```
+
 ## Load dataset
 
 Set paths.
@@ -236,7 +242,7 @@ df %>%
   paged_table()
 ```
 
-## Regression - Iteration 1
+## Regression
 
 The idea is to get the best models to predict the most important variables of the dataset.
 
@@ -457,7 +463,7 @@ best_models_main_variables <-
   best_models(df, important_columns_names)
 ```
 
-## View results - Iteration 1
+## View results
 
 ### R2-adjusted
 
@@ -499,22 +505,92 @@ The most characteristic patterns are:
 - Harmless_votes and malicious_votes are highly correlated between them, both has in common to be influenced by community_reputation.
 - Size is correlated with the number of files some times, what make sense. Maybe a column of the total files would be a good way to predict the size.
 
-## Regression - Iteration 2 
-
 ### Correlation between harmless_votes adn malicious_votes
 
 ```{r}
+lm_votes <-
+  lm(malicious_votes ~ harmless_votes, data = df)
+```
+
+```{r}
+summary(lm_votes)
+```
+```{r eval=FALSE}
 df %>% 
-  ggplot(harmless_votes ~ malicious_votes) +
+  ggplot(aes(x = harmless_votes, y = malicious_votes)) +
+  geom_point() + 
   geom_smooth(method = "lm")
 ```
 
+After plotting the results, that correlarion don't seem as amazing as before. That correlation id due to both columns are almost full of 0s.
 
-## View results - Iteration 2
+```{r}
+percent_of_0s <- 
+  function(x){
+    (sum(x == 0) / length(x)) %>% 
+    percent()
+  }
+```
+
+```{r}
+percent_of_0s(df$harmless_votes)
+percent_of_0s(df$malicious_votes)
+```
+
+### Correlarion between size and file types
+
+```{r}
+df$total_files <- 
+  df %>% 
+  select(contains("file_types")) %>% 
+  rowSums()
+```
+
+```{r}
+lm_size <- 
+  lm(size ~ total_files, data = df)
+```
+
+```{r}
+summary(lm_size)
+```
+
+```{r}
+df %>% 
+  ggplot(aes(y = size, x = total_files)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+The hypothesis is not met, the size don't have a good correlarion with the number of files.
+
+### Correlarion between positives and money permission
+
+```{r}
+lm_positives <- 
+  lm(positives ~ additional_info.androguard.RiskIndicator.PERM.MONEY, data = df)
+```
+
+```{r}
+summary(lm_positives)
+```
+
+```{r}
+df %>% 
+  ggplot(aes(
+    y = positives, 
+    x = additional_info.androguard.RiskIndicator.PERM.MONEY)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+The hypothesis is not met, the positives don't have a good correlarion with money permission.
 
 ## Conclusions
 
+The only valuable conclusion is that the algorithm works well.
 
+The correlations make sense but most of the correlations happen because of there are many NAs and therefore few real data. 
 
 
 
