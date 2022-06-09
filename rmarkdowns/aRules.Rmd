@@ -19,7 +19,6 @@ library(stringr)
 library(tidyverse)
 ```
 
-
 ```{r}
 path_import = "../virusTotal/data/original.csv"
 path_export = "../virusTotal/data/dataDiscretized.csv"
@@ -88,6 +87,13 @@ df_rules <- virus %>%
              additional_info.androguard.RiskIndicator.PERM.INSTALLER,
              additional_info.androguard.RiskIndicator.PERM.RUNTIME
              ))
+
+colnames(df_rules)<-gsub("additional_info.androguard.RiskIndicator.PERM.","",
+                         colnames(df_rules))
+View(df_rules)
+```
+
+```{r view, include=FALSE}
 View(df_rules)
 ```
 
@@ -154,11 +160,12 @@ View(df_discretize )
 ```
 
 ```{r}
-write.csv(df_discretize, path_export)
+View(df_discretize )
 ```
 
-
-
+```{r}
+write.csv(df_discretize, path_export)
+```
 
 ### We use the apriori method with standard confidence and support values.
 
@@ -178,11 +185,9 @@ inspect(head(r_significantes))
 
 ```
 
-
-
 ```{r}
 library(arulesViz)
-subrules <- subset(r_significantes, lift>4)
+subrules <- subset(r_significantes, lift>3)
 
 plot(subrules, method="graph", engine="htmlwidget", 
      igraphLayout = "layout_in_circle")
