@@ -67,7 +67,7 @@ virus <-
 ### We select the rules.
 
 ```{r lectura, include=FALSE}
-rules <- virus %>%
+df_rules <- virus %>%
    select(c( positives,
              additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
              additional_info.androguard.RiskIndicator.PERM.GPS,
@@ -88,7 +88,7 @@ rules <- virus %>%
              additional_info.androguard.RiskIndicator.PERM.INSTALLER,
              additional_info.androguard.RiskIndicator.PERM.RUNTIME
              ))
-View(rules)
+View(df_rules)
 ```
 
 ### We will discretize the values using quantiles.
@@ -141,7 +141,7 @@ df_cut_by_quantiles <-
   }
 
 df_test <- 
-  rules  %>% 
+  df_rules  %>% 
   df_cut_by_quantiles()
 View(df_test)
 ```
@@ -163,19 +163,26 @@ write.csv(df_discretize, path_export)
 ### We use the apriori method with standard confidence and support values.
 
 ```{r}
-r1 <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
+rules <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
 
 ```
-
-    subrules <- subset(rules, lift>8)
 
 ```{r}
-inspect(head(r1))
+redundantes <- is.redundant(rules)
+r_no_redundante <- rules[!redundantes]
+inspect(head(r_no_redundante))
+
+significantes <- is.significant(r_no_redundante)
+r_significantes <- r_no_redundante[significantes]
+inspect(head(r_significantes))
+
 ```
+
+
 
 ```{r}
 library(arulesViz)
-subrules <- subset(r1, lift>3)
+subrules <- subset(r_significantes, lift>4)
 
 plot(subrules, method="graph", engine="htmlwidget", 
      igraphLayout = "layout_in_circle")

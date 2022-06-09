@@ -24,8 +24,8 @@ path_import_o = "../virusTotal/data/original.csv"
 
 ```{r import, include=FALSE}
 virus_o <- read_csv(path_import_o)
-virus_o <- virus_o %>% select(contains('detected'))
-View(virus_o)
+virus_o <- virus_o %>% select(contains('detected')) %>% slice(1:20)
+##View(virus_o)
 ```
 
 ```{r import, include=FALSE}
@@ -36,7 +36,7 @@ virus_detected <- sapply(virus_o[, c(1:66)], as.character)
 
 # Los valores na corresponen a datos que no se han podido procesar
 virus_detected[is.na(virus_detected)]<-"UNABLE TO PROCESS"
-View(virus_detected)
+##View(virus_detected)
 
 ```
 
@@ -52,11 +52,46 @@ for (i in 1:ncol(virus_o)){
 
 ```
 
-```{r find,echo=TRUE}
-fc$find_implications(verbose = FALSE)
-#fc$find_concepts()
-#fc$concepts$plot()
+
+```{r import, include=FALSE}
+fc$reduce(TRUE)
+fc$clarify(TRUE)
 ```
+
+
+```{r find,echo=TRUE}
+fc$find_implications()
+```
+
+
+```{r find,echo=TRUE}
+fc$find_concepts()
+```
+
+
+```{r find,echo=TRUE}
+fc$concepts[1126]
+```
+
+
+
+
+```{r intents_extents,echo=TRUE}
+# Calculamos los intents y extents de los conceptos
+fc$concepts$intents()
+fc$concepts$extents()
+```
+
+
+```{r sublattice,echo=TRUE}
+idx <- which(fc$concepts$support() > 0.8)
+# Build the sublattice
+sublattice <- fc$concepts$sublattice(idx)
+sublattice$plot()
+```
+
+
+
 
 
 
