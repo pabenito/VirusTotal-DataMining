@@ -209,3 +209,7 @@ subrules <- subset(r_significantes, lift>3)
 plot(subrules, method="graph", engine="htmlwidget", 
      igraphLayout = "layout_in_circle")
 ```
+
+We see that if the number of positives is low, the danger is medium, indicating that the antivirus used by VirusTotal is of good quality.
+
+Another curious relationship is between privacy and money, which show a high dependency. Because to access your money they must first know your bank account details. There is also a similar relationship between sms and privacy.
