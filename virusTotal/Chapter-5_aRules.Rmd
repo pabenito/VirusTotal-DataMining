@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r librerias}
+```{r librerias, message=FALSE}
 library(dplyr)
 library(arules)
 library(magrittr)
@@ -24,7 +24,7 @@ library(tidyverse)
 
 ```{r}
 path_import = "data/original.csv"
-path_export = "data/dataDiscretized.csv"
+path_export = "data/discretized.csv"
 ```
 
 ### Import of the VirusTotal dataset.
@@ -42,9 +42,6 @@ virus <- read_csv(path_import)
 ### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
 ```{r read}
-
- 
-
 replace_na_which_colname_match <- 
   function(df, pattern, replacement){
     cols_to_replace <- 

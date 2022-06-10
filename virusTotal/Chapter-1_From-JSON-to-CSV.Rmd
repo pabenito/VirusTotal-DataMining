@@ -33,7 +33,7 @@ path_import_jsons <- "data/json"
 Set the path to export the dataset as CSV.
 
 ```{r}
-path_export_csv <- "data/virusTotalOriginal.csv"
+path_export_csv <- "data/original.csv"
 ```
 
 ## Libraries
