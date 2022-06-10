@@ -47,7 +47,6 @@ vignettes/*.pdf
 .RData
 .Ruserdata
 .rsconnect
-_book
 _bookdown_files
 *.DS_Store
 
