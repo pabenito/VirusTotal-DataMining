@@ -12,7 +12,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r librerias, message=FALSE}
+# Arules
+
+```{r message=FALSE}
 library(dplyr)
 library(arules)
 library(magrittr)
@@ -27,9 +29,9 @@ path_import = "data/original.csv"
 path_export = "data/discretized.csv"
 ```
 
-### Import of the VirusTotal dataset.
+## Import of the VirusTotal dataset.
 
-```{r import, include=FALSE}
+```{r include=FALSE}
 virus <- read_csv(path_import)
 ```
 
@@ -41,7 +43,7 @@ virus <- read_csv(path_import)
 
 ### We replace all the NA in the values of the columns permits, since we are going to relate them later with the numbers of positives.
 
-```{r read}
+```{r}
 replace_na_which_colname_match <- 
   function(df, pattern, replacement){
     cols_to_replace <- 
@@ -69,9 +71,9 @@ virus <-
 
 ```
 
-### We select the rules.
+## We select the rules.
 
-```{r select}
+```{r}
 df_rules <- virus %>%
    select(c( positives,
              additional_info.androguard.RiskIndicator.PERM.DANGEROUS,
@@ -96,16 +98,17 @@ df_rules <- virus %>%
 
 colnames(df_rules)<-gsub("additional_info.androguard.RiskIndicator.PERM.","",
                          colnames(df_rules))
-View(df_rules)
 ```
 
-```{r view, include=FALSE}
-View(df_rules)
+
+```{r eval=FALSE}
+df_rules %>% 
+  paged_table()
 ```
 
-### We will discretize the values using quantiles.
+## We will discretize the values using quantiles.
 
-### The function does not apply to columns with few values, as they do not provide much information.
+## The function does not apply to columns with few values, as they do not provide much information.
 
 ```{r discretize}
 
@@ -155,32 +158,30 @@ df_cut_by_quantiles <-
 df_test <- 
   df_rules  %>% 
   df_cut_by_quantiles()
-View(df_test)
 ```
 
-### We eliminate the untouched columns.
+## We eliminate the untouched columns.
 
 ```{r}
 df_discretize <- df_test %>% select(c( 1,2,4,5,8,9))
-View(df_discretize )
 ```
 
-```{r}
-View(df_discretize )
+```{r eval=FALSE}
+df_discretize %>% 
+  paged_table()
 ```
 
 ```{r}
 write.csv(df_discretize, path_export)
 ```
 
-### We use the apriori method with standard confidence and support values.
+## We use the apriori method with standard confidence and support values.
 
-```{r apriori}
+```{r}
 rules <- apriori(df_discretize, parameter = list(supp=0.1, target="rules", conf=0.8))
-
 ```
 
-### We remove redundant rules.
+## We remove redundant rules.
 
 ```{r}
 redundantes <- is.redundant(rules)
@@ -193,7 +194,7 @@ inspect(head(r_significantes))
 
 ```
 
-### Display
+## Display
 
 ```{r}
 library(arulesViz)

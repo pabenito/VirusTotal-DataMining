@@ -12,11 +12,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r librerias, message=FALSE}
+# FCA
+
+```{r message=FALSE}
 library(fcaR)
 library(dplyr)
 library(readr)
 library(tidyverse)
+library(rmarkdown)
 ```
 
 ```{r}
@@ -29,7 +32,7 @@ virus_o <- read_csv(path_import_o)
 
 ## Let's try to find out which antivirus share the same graphic engine. To do this we must study how the other antiviruses behave when one detects the files as a virus.
 
-### we create a reduced dummie of the data frame to reduce the time it takes to find implications and concepts
+## we create a reduced dummie of the data frame to reduce the time it takes to find implications and concepts
 
 ```{r}
 
@@ -42,7 +45,7 @@ colnames(virus_o)<-gsub("scans.","",colnames(virus_o))
 colnames(virus_o)<-gsub(".detected","",colnames(virus_o))
 ```
 
-### We leave only the antivirus name
+## We leave only the antivirus name
 
 ```{r}
 
@@ -50,13 +53,14 @@ colnames(virus_o)<-gsub("scans.","",colnames(virus_o))
 colnames(virus_o)<-gsub(".detected","",colnames(virus_o))
 ```
 
-```{r}
-View(virus_o)
+```{r eval=FALSE}
+virus_o %>% 
+  paged_table()
 ```
 
-### Transform boolean values to character to apply nominal scaling afterwards.
+## Transform boolean values to character to apply nominal scaling afterwards.
 
-### Null values symbolize that the file could not be processed.
+## Null values symbolize that the file could not be processed.
 
 ```{r}
 
@@ -66,11 +70,12 @@ virus_detected <- sapply(virus_o[, c(1:31)], as.character)
 virus_detected[is.na(virus_detected)]<-"UNABLE TO PROCESS"
 ```
 
-```{r}
-View(virus_detected)
+```{r eval=FALSE}
+virus_detected %>% 
+  paged_table()
 ```
 
-### We go through the columns and apply a nominal scaling.
+## We go through the columns and apply a nominal scaling.
 
 ```{r}
 #We create the formal context
@@ -82,15 +87,15 @@ for (i in 1:ncol(virus_o)){
 
 ```
 
-### Removes duplicated attributes and objects.
+## Removes duplicated attributes and objects.
 
-```{r , include=FALSE}
+```{r include=FALSE}
 fc$clarify(TRUE)
 ```
 
-### Implications and concepts with some examples
+## Implications and concepts with some examples
 
-```{r ,echo=TRUE}
+```{r echo=TRUE}
 fc$find_implications()
 ```
 
@@ -106,7 +111,7 @@ fc$implications[77]
 fc$concepts[16]
 ```
 
-### Avast acquired AVG in 2016, so they currently use the same engine with some different features. If our study has been carried out correctly, AVG=TRUE (detected as virus) should be a closure to Avast = TRUE.
+## Avast acquired AVG in 2016, so they currently use the same engine with some different features. If our study has been carried out correctly, AVG=TRUE (detected as virus) should be a closure to Avast = TRUE.
 
 ```{r closure}
 S <- Set$new(attributes = fc$attributes)
@@ -118,6 +123,6 @@ cat("It has as closed::")
 fc$closure(S)
 ```
 
-#### Even with a reduced data frame, this assumption holds true.
+## Even with a reduced data frame, this assumption holds true.
 
-#### Our study could also be used to look at the effectiveness of an antivirus. As long as we compare it with an antivirus that we consider reliable.
+## Our study could also be used to look at the effectiveness of an antivirus. As long as we compare it with an antivirus that we consider reliable.
