@@ -19,8 +19,8 @@ vignette: >
 Set the path of the dataframe file.
 
 ```{r}
-path_import = "../virusTotal/data/original.csv"
-path_export = "../virusTotal/data/preprocessed.csv"
+path_import = "data/original.csv"
+path_export = "data/preprocessed.csv"
 ```
 
 ## Libraries

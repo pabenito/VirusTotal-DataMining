@@ -12,10 +12,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r librerias}
 library(dplyr)
 library(arules)
@@ -27,8 +23,8 @@ library(tidyverse)
 ```
 
 ```{r}
-path_import = "../virusTotal/data/original.csv"
-path_export = "../virusTotal/data/dataDiscretized.csv"
+path_import = "data/original.csv"
+path_export = "data/dataDiscretized.csv"
 ```
 
 ### Import of the VirusTotal dataset.

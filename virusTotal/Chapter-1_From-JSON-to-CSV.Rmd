@@ -27,13 +27,13 @@ Steps:
 Set the path to import the JSONs files.
 
 ```{r}
-path_import_jsons <- "../virusTotal/data/json"
+path_import_jsons <- "data/json"
 ```
 
 Set the path to export the dataset as CSV.
 
 ```{r}
-path_export_csv <- "../virusTotal/data/virusTotalOriginal.csv"
+path_export_csv <- "data/virusTotalOriginal.csv"
 ```
 
 ## Libraries

@@ -45,7 +45,7 @@ library(igraph)
 Set paths.
 
 ```{r}
-path <- "../virusTotal/data/clustering.csv"
+path <- "data/clustering.csv"
 ```
 
 ```{r message=FALSE}

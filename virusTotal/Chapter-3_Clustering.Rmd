@@ -67,8 +67,8 @@ set.seed(0)
 Set paths.
 
 ```{r}
-path_import <- "../virusTotal/data/preprocessed.csv"
-path_export <- "../virusTotal/data/clustering.csv"
+path_import <- "data/preprocessed.csv"
+path_export <- "data/clustering.csv"
 ```
 
 

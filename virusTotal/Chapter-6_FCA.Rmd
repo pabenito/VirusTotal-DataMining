@@ -12,10 +12,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r librerias,echo=TRUE}
 library(fcaR)
 library(dplyr)
@@ -24,7 +20,7 @@ library(tidyverse)
 ```
 
 ```{r}
-path_import_o = "../virusTotal/data/original.csv"
+path_import_o = "data/original.csv"
 ```
 
 ```{r}
